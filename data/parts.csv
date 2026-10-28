@@ -1,0 +1,102 @@
+part_number,part_description,part_type,planner,qpc
+SKU2,Bolt M8 LH,Fastener,Alex Rivera,250
+SKU72,Strut Assy,Suspension,Sofia Novak,20
+SKU56,Windshield Gen2,Glass,Daniel Okafor,10
+SKU6,Fuse Box,Electrical,Sofia Novak,50
+SKU57,Compressor,HVAC,Priya Patel,
+SKU23,Strut Assy RH,Suspension,Priya Patel,20
+SKU81,Control Arm RH,Suspension,Marcus Chen,12
+SKU11,Rear Glass,glass ,Marcus Chen,4
+SKU16,Headlamp Assy,Lighting,Alex Rivera,8
+SKU33,Bolt M8 RH,Fastener,Alex Rivera,1000
+SKU99,Door Skin Gen2,Body Panel,Priya Patel,6
+SKU88,Compressor,HVAC,Sofia Novak,6
+SKU38,Sensor,Electrical,Daniel Okafor,100
+SKU3,Sensor LH,Electrical,Daniel Okafor,100
+SKU67,Caliper Assy LH,Brake,Alex Rivera,20
+SKU59,Blower Motor LH,HVAC,Marcus Chen,6
+SKU90,Sway Bar Link Gen2,Suspension,Priya Patel,24
+SKU68,Rotor,Brake,Priya Patel,40
+SKU100,Mirror Glass RH,Glass,Alex Rivera,4
+SKU17,Tail Lamp LH,Lighting,Alex Rivera,8
+SKU22,Blower Motor Gen2,HVAC,Priya Patel,6
+SKU13,Seat Track,Seat,Alex Rivera,2
+SKU7,Tail Lamp LH,Lighting,Priya Patel,16
+SKU78,Rivet Pack Gen2,Fastener,Sofia Novak,250
+SKU4,Rotor Gen2,Brake,Priya Patel,50
+SKU14,Mirror Glass,Glass,Marcus Chen,4
+SKU0049,Headrest RH,Seat,Daniel Okafor,4
+SKU76,Brake Line LH,Brake,Daniel Okafor,20
+SKU43,Sensor Gen2,Electrical,Alex Rivera,50
+SKU47,Fog Lamp Gen2,Lighting,Sofia Novak,16
+SKU41,Hood Gen2,Body Panel,Alex Rivera,4
+SKU29,Rotor RH,Brake,Alex Rivera,20
+SKU34,Rear Glass,Glass,Alex Rivera,
+SKU5,Compressor Gen2,HVAC,Alex Rivera,0
+SKU24,Condenser Gen2,HVAC,Sofia Novak,6
+SKU92,Bushing Kit,Suspension,Sofia Novak,20
+SKU28,Headrest,Seat,Daniel Okafor,6
+SKU86,TPMS Sensor Gen2,Wheel & Tire,Daniel Okafor,12
+ SKU93,Fog Lamp RH,Lighting,SOFIA NOVAK,8
+SKU31,Window Switch LH,electrical ,Daniel Okafor,50
+SKU15,Brake Line,Brake,Sofia Novak,24
+SKU94,Tail Lamp,lighting ,Daniel Okafor,8
+SKU36,Wheel 19in LH,Wheel & Tire,DANIEL OKAFOR,4
+SKU55,Headrest LH,Seat,Sofia Novak,6
+SKU42,Hood Gen2,Body Panel,Daniel Okafor,2
+SKU89,Bolt M8,Fastener,Marcus Chen,250
+SKU40,Mirror Glass Gen2,Glass,Priya Patel,10
+SKU21,Window Switch,Electrical,Marcus Chen ,25
+SKU52,Bolt M8 Gen2,Fastener,Sofia Novak,200
+SKU25,Lug Nut Set Gen2,Wheel & Tire,Sofia Novak,12
+SKU79,Bushing Kit RH,Suspension,Alex Rivera,24
+SKU46,Seat Cushion,Seat,Sofia Novak,4
+SKU61,Lug Nut Set,Wheel & Tire,Sofia Novak,4
+SKU37,Fender LH,Body Panel,Alex Rivera,2
+SKU0053,Lug Nut Set RH,Wheel & Tire,Priya Patel,4
+SKU45,Rear Glass,Glass,DANIEL OKAFOR,10
+SKU30,Wheel 19in Gen2,Wheel & Tire,Daniel Okafor,4
+SKU65,Fender RH,Body Panel,Marcus Chen,2
+SKU50,Pad Kit,Brake,Marcus Chen,20
+SKU66,Strut Assy RH,Suspension,Marcus Chen,20
+SKU48,Headrest Gen2,Seat,Sofia Novak,2
+SKU82,Headrest LH,Seat,Daniel Okafor,2
+SKU95,Sensor LH,Electrical,Daniel Okafor,50
+SKU35,Seat Track,Seat,Priya Patel,2
+SKU001,Fog Lamp,Lighting,Alex Rivera,10
+SKU64,Control Arm,Suspension,Daniel Okafor,10
+SKU39,Fog Lamp Gen2,Lighting,Marcus Chen,12
+SKU83,Compressor RH,HVAC,Sofia Novak,6
+SKU26,Clip Kit LH,Fastener,Alex Rivera,1000
+SKU69,Hood Gen2,Body Panel,Daniel Okafor,2
+SKU85,Door Skin RH,Body Panel,Sofia Novak,6
+SKU27,Sway Bar Link RH,Suspension,Daniel Okafor,10
+SKU20,Windshield,Glass,Marcus Chen,4
+SKU96,Rivet Pack Gen2,Fastener,Priya Patel,200
+SKU9,Window Switch Gen2,Electrical,Daniel Okafor,50
+SKU6,Fuse Box,Electrical,Sofia Novak,50
+SKU60,TPMS Sensor,Wheel & Tire,Daniel Okafor,8
+SKU91,Tire LH,Wheel & Tire,Daniel Okafor,8
+SKU19,Seat Cushion,Seat,Marcus Chen,4
+SKU75,Flange Nut Gen2,Fastener,Alex Rivera,250
+SKU10,Caliper Assy,Brake,Alex Rivera,40
+SKU77,Fuse Box,Electrical,Sofia Novak,120
+SKU8,Blower Motor,HVAC,Sofia Novak,8
+SKU73,Pad Kit,Brake,Marcus Chen,20
+SKU98,Compressor,HVAC,Sofia Novak,8
+SKU44,Bolt M8,Fastener,marcus chen,1000
+SKU71,Seat Cushion RH,Seat,Alex Rivera,2
+SKU84,Control Arm,Suspension,Priya Patel,24
+SKU80,Side Glass,Glass,Priya Patel,8
+SKU74,Bumper Fascia Gen2,Body Panel,Marcus Chen,6
+SKU12,Sensor,Electrical,Daniel Okafor,120
+SKU97,Wheel 19in Gen2,Wheel & Tire,Marcus Chen,4
+SKU63,Fender Gen2,Body Panel,alex rivera,4
+SKU32,Fender LH,Body Panel,Alex Rivera,6
+SKU18,Brake Line RH,Brake,Daniel Okafor,40
+SKU54,Fog Lamp Gen2,Lighting,Priya Patel,12
+SKU70,Headlamp Assy LH,lighting ,Marcus Chen,8
+SKU58,Flange Nut Gen2,Fastener,Sofia Novak,250
+SKU51,TPMS Sensor Gen2,Wheel & Tire,Sofia Novak,16
+SKU87,Blower Motor RH,HVAC,Daniel Okafor,8
+SKU62,Mirror Glass RH,Glass,Daniel Okafor,10
