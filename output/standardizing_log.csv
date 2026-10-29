@@ -1,0 +1,16 @@
+file,column,what_was_fixed,values_changed,raw_spellings,examples
+parts.csv,part_number,part number written one way: SKU and the number,4,4,'SKU0049' -> 'SKU49'; ' SKU93' -> 'SKU93'; 'SKU0053' -> 'SKU53'
+parts.csv,part_type,"label: one spelling, no stray case or spaces",4,3,'glass ' -> 'Glass'; 'electrical ' -> 'Electrical'; 'lighting ' -> 'Lighting'
+parts.csv,planner,"label: one spelling, no stray case or spaces",6,5,'SOFIA NOVAK' -> 'Sofia Novak'; 'DANIEL OKAFOR' -> 'Daniel Okafor'; 'Marcus Chen ' -> 'Marcus Chen'
+inventory_on_hand.csv,part_number,part number written one way: SKU and the number,16,15,'SKU-63' -> 'SKU63'; 'SKU-61' -> 'SKU61'; 'SKU-25' -> 'SKU25'
+inventory_on_hand.csv,location,"site name: GDC, PDC1, PDC2 or PDC3",37,12,'PDC-3' -> 'PDC3'; 'pdc3' -> 'PDC3'; 'GDC ' -> 'GDC'
+inventory_on_hand.csv,on_hand_qty,"number written as text, like '38.0' or '1,041'",35,34,'38.0' -> '38'; '66.0' -> '66'; '7.0' -> '7'
+incoming_supply.csv,part_number,part number written one way: SKU and the number,5,5,'SKU0022' -> 'SKU22'; 'SKU-53' -> 'SKU53'; 'sku92' -> 'SKU92'
+incoming_supply.csv,destination,"site name: GDC, PDC1, PDC2 or PDC3",13,7,'PDC 3' -> 'PDC3'; 'PDC-1' -> 'PDC1'; 'PDC-2' -> 'PDC2'
+incoming_supply.csv,qty,"number written as text, like '38.0' or '1,041'",25,21,"'1,103' -> '1103'; '277.0' -> '277'; '585.0' -> '585'"
+incoming_supply.csv,eta_date,date in another format: MM/DD/YYYY or DD-Mon-YYYY,37,32,'11/15/2026' -> '2026-11-15'; '17-Nov-2026' -> '2026-11-17'; '12/23/2026' -> '2026-12-23'
+demand_forecast_monthly.csv,part_number,part number written one way: SKU and the number,25,25,'SKU0076' -> 'SKU76'; 'SKU0053' -> 'SKU53'; ' SKU97' -> 'SKU97'
+demand_forecast_monthly.csv,location,"site name: GDC, PDC1, PDC2 or PDC3",62,12,'PDC 2' -> 'PDC2'; 'pdc1' -> 'PDC1'; 'GDC ' -> 'GDC'
+demand_forecast_monthly.csv,ship_to,"site name: GDC, PDC1, PDC2 or PDC3",25,8,'PDC 1' -> 'PDC1'; 'PDC-1' -> 'PDC1'; 'PDC-3' -> 'PDC3'
+demand_forecast_monthly.csv,demand_type,demand type: Direct or Replenishment,41,6,'DIRECT' -> 'Direct'; 'REPLENISHMENT' -> 'Replenishment'; 'direct' -> 'Direct'
+demand_forecast_monthly.csv,the 24 forecast months,"number written as text, like '38.0' or '1,041'",1513,217,'188.0' -> '188'; '162.0' -> '162'; '138.0' -> '138'

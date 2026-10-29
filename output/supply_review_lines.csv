@@ -1,0 +1,110 @@
+po_number,po_line,part_number,destination,source,qty,pallets,eta_date,review,action,status,status_jan31,run_out_date,short_when_landing,days_without_stock_before,pieces_above_26w,stock_jan31,no_demand_reason,qpc
+PO1036,10,SKU22,PDC2,Supplier,89.0,14.83,2026-11-15,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,80.0,249.0,,6.0
+PO1009,10,SKU53,PDC1,Supplier,24.0,6.0,2026-11-13,lands too late,expedite the PO,Short,Stockout,2026-11-06,3.0,7,0.0,0.0,,4.0
+PO1001,10,SKU82,PDC2,GDC Transfer,7.0,3.5,2026-12-10,adds to excess,already on the road: cut the next planned restock,Excess,Excess,,0.0,0,7.0,40.0,,2.0
+PO1051,20,SKU6,PDC1,GDC Transfer,37.0,0.74,2026-12-18,lands too late,already on the road: bridge from another site,Healthy,Excess,2026-11-29,5.0,19,0.0,58.0,,50.0
+PO1011,10,SKU43,PDC3,GDC Transfer,4432.0,88.64,2026-11-17,adds to excess,already on the road: cut the next planned restock,Healthy,Excess,,0.0,0,535.0,3408.0,,50.0
+PO1018,10,SKU15,PDC3,GDC Transfer,59.0,2.46,2026-12-23,on time,keep,Healthy,Healthy,,0.0,0,0.0,96.0,,24.0
+PO1048,10,SKU15,PDC1,Supplier,14.0,0.58,2026-12-02,on time,keep,Stockout,Short,2026-10-24,0.0,38,0.0,3.0,,24.0
+PO1012,20,SKU50,GDC,Supplier,1103.0,55.15,2027-01-04,adds to excess,push out or cut the pieces above the 26-week line,Healthy,Excess,,0.0,0,235.0,2174.0,,20.0
+PO1031,20,SKU20,PDC3,GDC Transfer,10.0,2.5,2026-12-07,lands too late,already on the road: bridge from another site,Short,Stockout,2026-11-03,8.0,34,0.0,-11.0,,4.0
+PO1020,20,SKU50,PDC2,GDC Transfer,277.0,13.85,2026-12-11,lands too late,already on the road: bridge from another site,Short,Stockout,2026-10-29,188.0,43,0.0,-16.0,,20.0
+PO1028,20,SKU72,PDC3,GDC Transfer,133.0,6.65,2026-10-31,lands too late,already on the road: bridge from another site,Short,Stockout,2026-10-25,16.0,6,0.0,-76.0,,20.0
+PO1027,20,SKU50,PDC1,GDC Transfer,147.0,7.35,2026-11-20,on time,keep,Healthy,Healthy,,0.0,0,0.0,207.0,,20.0
+PO1030,10,SKU94,PDC3,Supplier,98.0,12.25,2026-10-27,on time,keep,Healthy,Healthy,,0.0,0,0.0,54.0,,8.0
+PO1024,10,SKU3,PDC1,Supplier,138.0,1.38,2026-12-26,on time,keep,Short,Short,2026-10-30,0.0,1,0.0,33.0,,100.0
+PO1033,10,SKU38,PDC1,GDC Transfer,13.0,0.13,2026-11-29,lands too late,already on the road: bridge from another site,Short,Excess,2026-10-30,12.0,30,13.0,85.0,,100.0
+PO1017,10,SKU73,PDC2,GDC Transfer,34.0,1.7,2026-10-26,on time,keep,Short,Healthy,,0.0,0,0.0,43.0,,20.0
+PO1047,10,SKU44,PDC2,GDC Transfer,585.0,0.58,2026-12-04,on time,keep,Healthy,Healthy,,0.0,0,0.0,396.0,,1000.0
+PO1024,20,SKU28,PDC1,Supplier,2.0,0.33,2027-01-04,on time,keep,Stockout,Healthy,2026-11-15,0.0,47,0.0,2.0,,6.0
+PO1028,10,SKU7,GDC,Supplier,66.0,4.12,2027-01-10,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,66.0,731.0,,16.0
+PO1023,10,SKU62,GDC,Supplier,22.0,2.2,2027-01-08,lands too late,expedite the PO,Short,Stockout,2026-11-01,40.0,68,0.0,-26.0,,10.0
+PO1046,10,SKU4,PDC3,Supplier,69.0,1.38,2026-12-07,on time,keep,Healthy,Healthy,,0.0,0,0.0,98.0,,50.0
+PO1014,20,SKU92,PDC2,GDC Transfer,49.0,2.45,2027-01-03,lands too late,already on the road: bridge from another site,Stockout,Stockout,2026-10-22,81.0,73,0.0,-60.0,,20.0
+PO1020,10,SKU26,PDC3,Supplier,1007.0,1.01,2026-11-10,on time,keep,Healthy,Healthy,,0.0,0,0.0,589.0,,1000.0
+PO1016,10,SKU1,PDC2,GDC Transfer,83.0,8.3,2027-01-11,lands too late,already on the road: bridge from another site,Healthy,Healthy,2026-11-21,26.0,51,0.0,50.0,,10.0
+PO1031,10,SKU47,PDC2,GDC Transfer,116.0,7.25,2027-01-01,lands too late,already on the road: bridge from another site,Healthy,Excess,2026-11-27,16.0,35,13.0,89.0,,16.0
+PO1029,10,SKU24,PDC3,Supplier,20.0,3.33,2027-01-12,lands too late,expedite the PO,Short,Stockout,2026-10-27,28.0,77,0.0,-14.0,,6.0
+PO1049,10,SKU89,PDC3,GDC Transfer,42.0,0.17,2026-10-30,lands too late,already on the road: bridge from another site,Stockout,Healthy,2026-10-22,12.0,8,0.0,189.0,,250.0
+PO1008,10,SKU74,GDC,Supplier,59.0,9.83,2027-01-03,lands too late,expedite the PO,Short,Stockout,2026-11-01,105.0,63,0.0,-46.0,,6.0
+PO1009,20,SKU7,GDC,Supplier,65.0,4.06,2026-12-05,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,65.0,731.0,,16.0
+PO1015,20,SKU15,PDC2,Supplier,31.0,1.29,2027-01-11,on time,keep,Stockout,Short,2026-10-22,0.0,52,0.0,17.0,,24.0
+PO1042,20,SKU69,PDC2,GDC Transfer,44.0,22.0,2027-01-10,lands too late,already on the road: bridge from another site,Healthy,Healthy,2026-11-29,11.0,42,0.0,30.0,,2.0
+PO1034,20,SKU5,PDC1,GDC Transfer,13.0,3.25,2026-11-02,on time,keep,Short,Short,,0.0,0,0.0,4.0,,4.0
+PO1026,20,SKU87,PDC2,Supplier,51.0,6.38,2027-01-10,lands too late,expedite the PO,Healthy,Excess,2026-12-19,5.0,22,4.0,42.0,,8.0
+PO1023,20,SKU29,PDC3,GDC Transfer,21.0,1.05,2026-12-08,lands too late,already on the road: bridge from another site,Short,Stockout,2026-11-12,9.0,26,0.0,-12.0,,20.0
+PO1052,20,SKU14,PDC1,GDC Transfer,18.0,4.5,2026-10-25,lands too late,already on the road: bridge from another site,Stockout,Healthy,2026-10-23,1.0,2,0.0,23.0,,4.0
+PO1047,20,SKU60,PDC2,GDC Transfer,17.0,2.12,2026-11-08,on time,keep,Short,Short,,0.0,0,0.0,11.0,,8.0
+PO1010,10,SKU74,PDC3,GDC Transfer,9.0,1.5,2026-11-24,lands too late,already on the road: bridge from another site,Stockout,Stockout,2026-10-24,7.0,31,0.0,-3.0,,6.0
+PO1038,10,SKU31,PDC1,GDC Transfer,48.0,0.96,2026-12-25,adds to excess,already on the road: cut the next planned restock,Excess,Excess,,0.0,0,18.0,175.0,,50.0
+PO1007,20,SKU68,PDC1,Supplier,219.0,5.48,2026-10-29,on time,keep,Healthy,Healthy,,0.0,0,0.0,133.0,,40.0
+PO1046,20,SKU56,PDC2,GDC Transfer,22.0,2.2,2026-10-26,lands too late,already on the road: bridge from another site,Stockout,Short,2026-10-23,1.0,3,0.0,7.0,,10.0
+PO1019,20,SKU15,PDC2,GDC Transfer,31.0,1.29,2026-11-23,lands too late,already on the road: bridge from another site,Stockout,Short,2026-10-22,36.0,32,0.0,17.0,,24.0
+PO1005,20,SKU11,PDC2,Supplier,18.0,4.5,2026-12-21,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,18.0,168.0,,4.0
+PO1033,20,SKU52,PDC2,Supplier,71.0,0.36,2026-11-16,lands too late,expedite the PO,Short,Short,2026-11-10,8.0,6,0.0,28.0,,200.0
+PO1004,10,SKU96,PDC2,GDC Transfer,65.0,0.32,2026-12-09,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,477.0,dead stock: no demand anywhere in the network,200.0
+PO1011,20,SKU19,PDC3,Supplier,14.0,3.5,2027-01-03,lands too late,expedite the PO,Stockout,Stockout,2026-10-24,4.0,71,0.0,0.0,,4.0
+PO1037,10,SKU35,PDC3,GDC Transfer,10.0,5.0,2026-11-30,adds to excess,already on the road: cut the next planned restock,Excess,Excess,,0.0,0,10.0,48.0,,2.0
+PO1044,10,SKU58,PDC2,Supplier,58.0,0.23,2026-11-05,on time,keep,Short,Healthy,,0.0,0,0.0,50.0,,250.0
+PO1027,10,SKU9,PDC2,GDC Transfer,23.0,0.46,2026-12-15,on time,keep,Healthy,Healthy,,0.0,0,0.0,19.0,,50.0
+PO1042,10,SKU3,PDC1,Supplier,138.0,1.38,2026-10-31,lands too late,expedite the PO,Short,Short,2026-10-30,1.0,1,0.0,33.0,,100.0
+PO1036,20,SKU60,PDC1,Supplier,17.0,2.12,2026-11-08,on time,keep,Short,Short,2026-10-31,0.0,1,0.0,10.0,,8.0
+PO1007,10,SKU50,GDC,Supplier,1103.0,55.15,2026-12-30,on time,keep,Healthy,Excess,,0.0,0,0.0,2174.0,,20.0
+PO1048,20,SKU35,GDC,Supplier,101.0,50.5,2026-11-06,on time,keep,Healthy,Healthy,,0.0,0,0.0,132.0,,2.0
+PO1040,10,SKU27,GDC,Supplier,44.0,4.4,2026-12-04,lands too late,expedite the PO,Short,Stockout,2026-12-01,4.0,3,0.0,-63.0,,10.0
+PO1019,10,SKU70,PDC3,Supplier,12.0,1.5,2026-11-11,lands too late,expedite the PO,Short,Stockout,2026-11-03,2.0,8,0.0,-12.0,,8.0
+PO1004,20,SKU71,PDC2,GDC Transfer,50.0,25.0,2026-12-25,on time,keep,Healthy,Healthy,,0.0,0,0.0,51.0,,2.0
+PO1002,20,SKU84,PDC2,Supplier,42.0,1.75,2026-12-15,lands too late,expedite the PO,Short,Stockout,2026-11-10,31.0,35,0.0,-30.0,,24.0
+PO1022,10,SKU98,PDC2,Supplier,1505.0,188.12,2027-01-12,lands too late,expedite the PO,Stockout,Stockout,2026-10-22,2078.0,82,0.0,-1063.0,,8.0
+PO1025,10,SKU75,PDC3,Supplier,5843.0,23.37,2026-12-29,lands too late,expedite the PO,Healthy,Excess,2026-12-05,571.0,24,84.0,4494.0,,250.0
+PO1013,10,SKU29,PDC2,Supplier,5.0,0.25,2026-10-25,on time,keep,Stockout,Stockout,2026-12-28,0.0,0,0.0,-5.0,,20.0
+PO1041,20,SKU30,PDC2,GDC Transfer,9.0,2.25,2027-01-07,lands too late,already on the road: bridge from another site,Short,Stockout,2026-11-04,10.0,64,0.0,-6.0,,4.0
+PO1030,20,SKU30,PDC1,Supplier,3.0,0.75,2026-12-01,lands too late,expedite the PO,Stockout,Stockout,2026-11-15,1.0,16,0.0,-1.0,,4.0
+PO1021,20,SKU95,PDC2,GDC Transfer,117.0,2.34,2026-11-26,on time,keep,Healthy,Healthy,,0.0,0,0.0,82.0,,50.0
+PO1012,10,SKU14,GDC,Supplier,119.0,29.75,2026-12-25,on time,keep,Healthy,Healthy,,0.0,0,0.0,99.0,,4.0
+PO1018,20,SKU52,GDC,Supplier,158.0,0.79,2026-11-02,on time,keep,Healthy,Stockout,2026-12-01,0.0,0,0.0,-384.0,,200.0
+PO1052,10,SKU17,PDC2,GDC Transfer,92.0,11.5,2026-12-09,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,338.0,dead stock: no demand anywhere in the network,8.0
+PO1006,20,SKU96,PDC2,GDC Transfer,65.0,0.32,2026-12-07,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,477.0,dead stock: no demand anywhere in the network,200.0
+PO1051,10,SKU62,PDC1,Supplier,38.0,3.8,2026-11-08,on time,keep,Healthy,Healthy,,0.0,0,0.0,26.0,,10.0
+PO1021,10,SKU19,PDC2,GDC Transfer,5.0,1.25,2026-11-19,on time,keep,Short,Healthy,,0.0,0,0.0,4.0,,4.0
+PO1044,20,SKU80,PDC3,GDC Transfer,39.0,4.88,2026-11-04,on time,keep,Healthy,Healthy,,0.0,0,0.0,16.0,,8.0
+PO1026,10,SKU27,GDC,Supplier,44.0,4.4,2026-11-03,on time,keep,Short,Stockout,2026-12-01,0.0,0,0.0,-63.0,,10.0
+PO1045,10,SKU16,PDC3,Supplier,199.0,24.88,2026-12-07,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,564.0,dead stock: no demand anywhere in the network,8.0
+PO1006,10,SKU43,GDC,Supplier,1136.0,22.72,2027-01-04,adds to excess,push out or cut the pieces above the 26-week line,Healthy,Excess,,0.0,0,1136.0,2808.0,,50.0
+PO1043,20,SKU99,PDC3,Supplier,4.0,0.67,2026-10-28,lands too late,expedite the PO,Stockout,Stockout,2026-10-26,1.0,2,0.0,-1.0,,6.0
+PO1015,10,SKU6,PDC1,GDC Transfer,38.0,0.76,2026-12-23,adds to excess,already on the road: cut the next planned restock,Healthy,Excess,2026-11-29,0.0,19,8.0,58.0,,50.0
+PO1010,20,SKU4,PDC3,Supplier,69.0,1.38,2026-12-12,on time,keep,Healthy,Healthy,,0.0,0,0.0,98.0,,50.0
+PO1032,20,SKU69,GDC,Supplier,40.0,20.0,2026-12-10,lands too late,expedite the PO,Short,Stockout,2026-11-01,28.0,39,0.0,-10.0,,2.0
+PO1054,20,SKU72,PDC2,Supplier,76.0,3.8,2026-12-23,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,76.0,842.0,,20.0
+PO1045,20,SKU80,PDC1,GDC Transfer,18.0,2.25,2026-12-29,lands too late,already on the road: bridge from another site,Short,Short,2026-11-14,14.0,45,0.0,6.0,,8.0
+PO1053,20,SKU72,PDC2,GDC Transfer,76.0,3.8,2026-12-14,adds to excess,already on the road: cut the next planned restock,Excess,Excess,,0.0,0,76.0,842.0,,20.0
+PO1053,10,SKU9,GDC,Supplier,345.0,6.9,2026-12-07,lands too late,expedite the PO,Healthy,Healthy,2026-11-01,1.0,36,0.0,294.0,,50.0
+PO1003,10,SKU81,GDC,Supplier,26.0,2.17,2026-12-27,on time,keep,Healthy,Stockout,2027-01-22,0.0,0,0.0,-9.0,,12.0
+PO1025,20,SKU77,GDC,Supplier,157.0,1.31,2026-10-25,on time,keep,Short,Stockout,2027-01-01,0.0,0,0.0,-141.0,,120.0
+PO1035,20,SKU99,PDC2,Supplier,6.0,1.0,2026-11-28,lands too late,expedite the PO,Short,Stockout,2026-11-05,3.0,23,0.0,-5.0,,6.0
+PO1022,20,SKU65,PDC1,Supplier,11.0,5.5,2026-12-26,lands too late,expedite the PO,Healthy,Healthy,2026-12-16,1.0,10,0.0,7.0,,2.0
+PO1008,20,SKU14,PDC3,Supplier,5.0,1.25,2026-10-26,lands too late,expedite the PO,Stockout,Healthy,2026-10-25,1.0,1,0.0,4.0,,4.0
+PO1050,10,SKU43,GDC,Supplier,1136.0,22.72,2026-11-23,adds to excess,push out or cut the pieces above the 26-week line,Healthy,Excess,,0.0,0,530.0,2808.0,,50.0
+PO1003,20,SKU61,PDC2,GDC Transfer,15.0,3.75,2026-10-27,on time,keep,Healthy,Healthy,,0.0,0,0.0,8.0,,4.0
+PO1034,10,SKU90,PDC3,Supplier,40.0,1.67,2027-01-09,on time,keep,Healthy,Healthy,,0.0,0,0.0,98.0,,24.0
+PO1016,20,SKU12,GDC,Supplier,118.0,0.98,2026-12-15,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,69.0,372.0,,120.0
+PO1039,10,SKU51,GDC,Supplier,48.0,3.0,2026-12-15,lands too late,expedite the PO,Healthy,Stockout,2026-12-01,107.0,14,0.0,-182.0,,16.0
+PO1002,10,SKU71,PDC1,GDC Transfer,16.0,8.0,2026-12-09,on time,keep,Stockout,Healthy,2026-10-23,0.0,39,0.0,20.0,,2.0
+PO1005,10,SKU91,GDC,Supplier,153.0,19.12,2027-01-04,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,153.0,638.0,,8.0
+PO1049,20,SKU8,PDC2,Supplier,50.0,6.25,2026-11-06,on time,keep,Healthy,Healthy,,0.0,0,0.0,27.0,,8.0
+PO1035,10,SKU65,GDC,Supplier,44.0,22.0,2026-12-13,on time,keep,Healthy,Healthy,,0.0,0,0.0,29.0,,2.0
+PO1017,20,SKU35,GDC,Supplier,100.0,50.0,2027-01-04,on time,keep,Healthy,Healthy,,0.0,0,0.0,132.0,,2.0
+PO1014,10,SKU25,PDC2,Supplier,90.0,7.5,2026-11-11,on time,keep,Short,Healthy,,0.0,0,0.0,100.0,,12.0
+PO1029,20,SKU17,PDC2,Supplier,92.0,11.5,2026-12-15,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,338.0,dead stock: no demand anywhere in the network,8.0
+PO1039,20,SKU79,PDC3,GDC Transfer,24.0,1.0,2026-11-28,lands too late,already on the road: bridge from another site,Stockout,Short,2026-10-22,22.0,37,0.0,1.0,,24.0
+PO1038,20,SKU58,PDC3,Supplier,8.0,0.03,2026-11-09,adds to excess,push out or cut the pieces above the 26-week line,Healthy,Excess,,0.0,0,8.0,85.0,,250.0
+PO1001,20,SKU51,GDC,Supplier,48.0,3.0,2026-12-29,lands too late,expedite the PO,Healthy,Stockout,2026-12-01,69.0,28,0.0,-182.0,,16.0
+PO1013,20,SKU27,PDC3,GDC Transfer,2.0,0.2,2026-11-25,on time,keep,Healthy,Short,,0.0,0,0.0,3.0,,10.0
+PO1032,10,SKU39,GDC,Supplier,133.0,11.08,2026-11-05,no demand anywhere,cancel or return: no demand anywhere in the network,No demand,No demand,,0.0,0,0.0,504.0,dead stock: no demand anywhere in the network,12.0
+PO1041,10,SKU77,PDC2,GDC Transfer,57.0,0.48,2027-01-11,lands too late,already on the road: bridge from another site,Healthy,Healthy,2026-12-23,9.0,19,0.0,37.0,,120.0
+PO9999,10,SKU903,PDC1,Supplier,60.0,,2026-11-20,not in the part master,check the part number before it lands (4.10),No demand,No demand,,0.0,0,0.0,60.0,not in the part master (4.10),
+PO1040,20,SKU89,PDC3,Supplier,42.0,0.17,2026-12-29,lands too late,expedite the PO,Stockout,Healthy,2026-10-22,57.0,48,0.0,189.0,,250.0
+PO1054,10,SKU5,GDC,Supplier,36.0,9.0,2026-12-11,adds to excess,push out or cut the pieces above the 26-week line,Healthy,Excess,,0.0,0,14.0,38.0,,4.0
+PO1043,10,SKU71,PDC2,GDC Transfer,51.0,25.5,2026-11-19,on time,keep,Healthy,Healthy,,0.0,0,0.0,51.0,,2.0
+PO1050,20,SKU15,GDC,Supplier,647.0,26.96,2026-12-29,on time,keep,Healthy,Healthy,,0.0,0,0.0,456.0,,24.0
+PO1037,20,SKU73,GDC,Supplier,190.0,9.5,2026-11-27,adds to excess,push out or cut the pieces above the 26-week line,Excess,Excess,,0.0,0,52.0,800.0,,20.0

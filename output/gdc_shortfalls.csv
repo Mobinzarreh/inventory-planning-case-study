@@ -1,0 +1,54 @@
+part_number,status,on_hand_qty,run_out_date,next_po_eta,worst_backorder,pallets_short,pdc_restock_not_sent,stock_jan31,action
+SKU75,Healthy,6072.0,2026-11-26,,8924.0,35.7,2000.0,-8924.0,no PO lands after the run-out: order now
+SKU26,Short,814.0,2026-11-01,,6386.0,6.39,5319.0,-6386.0,no PO lands after the run-out: order now
+SKU2,Healthy,5573.0,2026-12-07,,6049.0,24.2,0.0,-6049.0,no PO lands after the run-out: order now
+SKU83,Short,50.0,2026-10-30,,1103.0,183.83,594.0,-1103.0,no PO lands after the run-out: order now
+SKU76,Short,32.0,2026-10-29,,824.0,41.2,460.0,-824.0,no PO lands after the run-out: order now
+SKU46,Stockout,-11.0,2026-10-22,,695.0,173.75,568.0,-695.0,no PO lands after the run-out: order now
+SKU58,Healthy,353.0,2026-12-01,,593.0,2.37,318.0,-593.0,no PO lands after the run-out: order now
+SKU92,Short,38.0,2026-11-01,,408.0,20.4,386.0,-408.0,no PO lands after the run-out: order now
+SKU52,Healthy,504.0,2026-12-01,,384.0,1.92,238.0,-384.0,no PO lands after the run-out: order now
+SKU94,Short,58.0,2026-11-01,,374.0,46.75,52.0,-374.0,no PO lands after the run-out: order now
+SKU72,Short,65.0,2026-11-01,,356.0,17.8,121.0,-356.0,no PO lands after the run-out: order now
+SKU21,Short,26.0,2026-11-01,,348.0,13.92,165.0,-348.0,no PO lands after the run-out: order now
+SKU4,Short,21.0,2026-11-01,,316.0,6.32,282.0,-316.0,no PO lands after the run-out: order now
+SKU45,Healthy,214.0,2026-11-01,,286.0,28.6,287.0,-286.0,no PO lands after the run-out: order now
+SKU24,Short,13.0,2026-10-28,,280.0,46.67,84.0,-280.0,no PO lands after the run-out: order now
+SKU84,Stockout,0.0,2026-10-22,,264.0,11.0,192.0,-264.0,no PO lands after the run-out: order now
+SKU54,Healthy,624.0,2026-12-30,,248.0,20.67,72.0,-248.0,no PO lands after the run-out: order now
+SKU86,Healthy,205.0,2026-12-01,,220.0,18.33,193.0,-220.0,no PO lands after the run-out: order now
+SKU64,Short,30.0,2026-11-01,,191.0,19.1,154.0,-191.0,no PO lands after the run-out: order now
+SKU51,Healthy,176.0,2026-12-01,2026-12-15,182.0,11.38,147.0,-182.0,expedite the open PO and check it covers the gap
+SKU87,Healthy,224.0,2026-12-01,,160.0,20.0,85.0,-160.0,no PO lands after the run-out: order now
+SKU77,Short,66.0,2027-01-01,,141.0,1.18,105.0,-141.0,no PO lands after the run-out: order now
+SKU48,Short,20.0,2026-11-11,,134.0,67.0,50.0,-134.0,no PO lands after the run-out: order now
+SKU41,Short,22.0,2026-11-01,,119.0,29.75,97.0,-119.0,no PO lands after the run-out: order now
+SKU74,Short,9.0,2026-11-01,2027-01-03,105.0,17.5,46.0,-46.0,expedite the open PO and check it covers the gap
+SKU10,Short,14.0,2026-11-11,,100.0,2.5,40.0,-100.0,no PO lands after the run-out: order now
+SKU29,Short,7.0,2026-11-01,,87.0,4.35,40.0,-87.0,no PO lands after the run-out: order now
+SKU6,Healthy,76.0,2026-11-01,,81.0,1.62,30.0,-81.0,no PO lands after the run-out: order now
+SKU57,Healthy,61.0,2026-12-04,,67.0,11.17,30.0,-67.0,no PO lands after the run-out: order now
+SKU95,Stockout,0.0,2026-10-24,,67.0,1.34,50.0,-67.0,no PO lands after the run-out: order now
+SKU27,Short,38.0,2026-12-01,2026-12-04,63.0,6.3,10.0,-63.0,expedite the open PO and check it covers the gap
+SKU66,Healthy,128.0,2026-12-13,,63.0,3.15,40.0,-63.0,no PO lands after the run-out: order now
+SKU56,Healthy,174.0,2027-01-01,,60.0,6.0,22.0,-60.0,no PO lands after the run-out: order now
+SKU34,Healthy,47.0,2026-12-01,,50.0,8.33,32.0,-50.0,no PO lands after the run-out: order now
+SKU62,Short,2.0,2026-11-01,2027-01-08,40.0,4.0,13.0,-26.0,expedite the open PO and check it covers the gap
+SKU47,Healthy,70.0,2027-01-01,,36.0,2.25,16.0,-36.0,no PO lands after the run-out: order now
+SKU53,Healthy,76.0,2027-01-01,,34.0,8.5,30.0,-34.0,no PO lands after the run-out: order now
+SKU70,Stockout,0.0,2026-11-01,,30.0,3.75,24.0,-30.0,no PO lands after the run-out: order now
+SKU82,Stockout,0.0,2026-10-29,,30.0,15.0,20.0,-30.0,no PO lands after the run-out: order now
+SKU69,Short,12.0,2026-11-01,2026-12-10,28.0,14.0,0.0,-10.0,expedite the open PO and check it covers the gap
+SKU28,Healthy,73.0,2027-01-01,,23.0,3.83,19.0,-23.0,no PO lands after the run-out: order now
+SKU93,Healthy,66.0,2027-01-01,,22.0,2.75,23.0,-22.0,no PO lands after the run-out: order now
+SKU30,Healthy,25.0,2027-01-01,,18.0,4.5,4.0,-18.0,no PO lands after the run-out: order now
+SKU49,Healthy,7.0,2026-12-08,,14.0,3.5,8.0,-14.0,no PO lands after the run-out: order now
+SKU37,Short,5.0,2026-11-01,,13.0,6.5,14.0,-13.0,no PO lands after the run-out: order now
+SKU20,Short,3.0,2026-11-01,,12.0,3.0,9.0,-12.0,no PO lands after the run-out: order now
+SKU79,Healthy,115.0,2027-01-02,,10.0,0.42,0.0,-10.0,no PO lands after the run-out: order now
+SKU32,Healthy,16.0,2026-12-25,,10.0,1.67,0.0,-10.0,no PO lands after the run-out: order now
+SKU81,Healthy,72.0,2027-01-22,,9.0,0.75,0.0,-9.0,no PO lands after the run-out: order now
+SKU99,Short,3.0,2026-11-01,,9.0,1.5,9.0,-9.0,no PO lands after the run-out: order now
+SKU22,Healthy,26.0,2027-01-13,,7.0,1.17,0.0,-7.0,no PO lands after the run-out: order now
+SKU8,Healthy,121.0,2027-01-19,,4.0,0.5,0.0,-4.0,no PO lands after the run-out: order now
+SKU9,Healthy,99.0,2026-11-01,2026-12-07,1.0,0.02,0.0,294.0,expedite the open PO and check it covers the gap

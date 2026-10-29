@@ -1,0 +1,6 @@
+location,pairs,stockout,short,healthy,excess,no_demand,stockout_share,short_share,healthy_share,excess_share,no_demand_share,pallets_on_hand,pallets_above_26w,dead_stock_pallets,wanted_elsewhere_pallets,unknown_part_pieces,watch_list,timing_flags
+GDC,97,5,22,41,20,9,0.05,0.23,0.42,0.21,0.09,2644.8,862.44,137.69,0.0,120.0,12,0
+PDC1,82,17,21,19,13,12,0.21,0.26,0.23,0.16,0.15,438.62,62.1,86.34,30.7,0.0,4,0
+PDC2,89,12,24,25,17,11,0.13,0.27,0.28,0.19,0.12,884.14,225.66,126.78,67.56,35.0,5,0
+PDC3,72,13,16,30,5,8,0.18,0.22,0.42,0.07,0.11,425.28,17.72,122.3,87.02,0.0,2,0
+All sites,340,47,83,115,55,40,0.14,0.24,0.34,0.16,0.12,4392.84,1167.92,473.11,185.28,155.0,23,0

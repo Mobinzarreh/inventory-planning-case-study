@@ -1,0 +1,101 @@
+part_number,part_description,part_type,planner,qpc,qpc_is_estimate
+SKU2,Bolt M8 LH,Fastener,Alex Rivera,250.0,False
+SKU72,Strut Assy,Suspension,Sofia Novak,20.0,False
+SKU56,Windshield Gen2,Glass,Daniel Okafor,10.0,False
+SKU6,Fuse Box,Electrical,Sofia Novak,50.0,False
+SKU57,Compressor,HVAC,Priya Patel,6.0,True
+SKU23,Strut Assy RH,Suspension,Priya Patel,20.0,False
+SKU81,Control Arm RH,Suspension,Marcus Chen,12.0,False
+SKU11,Rear Glass,Glass,Marcus Chen,4.0,False
+SKU16,Headlamp Assy,Lighting,Alex Rivera,8.0,False
+SKU33,Bolt M8 RH,Fastener,Alex Rivera,1000.0,False
+SKU99,Door Skin Gen2,Body Panel,Priya Patel,6.0,False
+SKU88,Compressor,HVAC,Sofia Novak,6.0,False
+SKU38,Sensor,Electrical,Daniel Okafor,100.0,False
+SKU3,Sensor LH,Electrical,Daniel Okafor,100.0,False
+SKU67,Caliper Assy LH,Brake,Alex Rivera,20.0,False
+SKU59,Blower Motor LH,HVAC,Marcus Chen,6.0,False
+SKU90,Sway Bar Link Gen2,Suspension,Priya Patel,24.0,False
+SKU68,Rotor,Brake,Priya Patel,40.0,False
+SKU100,Mirror Glass RH,Glass,Alex Rivera,4.0,False
+SKU17,Tail Lamp LH,Lighting,Alex Rivera,8.0,False
+SKU22,Blower Motor Gen2,HVAC,Priya Patel,6.0,False
+SKU13,Seat Track,Seat,Alex Rivera,2.0,False
+SKU7,Tail Lamp LH,Lighting,Priya Patel,16.0,False
+SKU78,Rivet Pack Gen2,Fastener,Sofia Novak,250.0,False
+SKU4,Rotor Gen2,Brake,Priya Patel,50.0,False
+SKU14,Mirror Glass,Glass,Marcus Chen,4.0,False
+SKU49,Headrest RH,Seat,Daniel Okafor,4.0,False
+SKU76,Brake Line LH,Brake,Daniel Okafor,20.0,False
+SKU43,Sensor Gen2,Electrical,Alex Rivera,50.0,False
+SKU47,Fog Lamp Gen2,Lighting,Sofia Novak,16.0,False
+SKU41,Hood Gen2,Body Panel,Alex Rivera,4.0,False
+SKU29,Rotor RH,Brake,Alex Rivera,20.0,False
+SKU34,Rear Glass,Glass,Alex Rivera,6.0,True
+SKU5,Compressor Gen2,HVAC,Alex Rivera,4.0,True
+SKU24,Condenser Gen2,HVAC,Sofia Novak,6.0,False
+SKU92,Bushing Kit,Suspension,Sofia Novak,20.0,False
+SKU28,Headrest,Seat,Daniel Okafor,6.0,False
+SKU86,TPMS Sensor Gen2,Wheel & Tire,Daniel Okafor,12.0,False
+SKU93,Fog Lamp RH,Lighting,Sofia Novak,8.0,False
+SKU31,Window Switch LH,Electrical,Daniel Okafor,50.0,False
+SKU15,Brake Line,Brake,Sofia Novak,24.0,False
+SKU94,Tail Lamp,Lighting,Daniel Okafor,8.0,False
+SKU36,Wheel 19in LH,Wheel & Tire,Daniel Okafor,4.0,False
+SKU55,Headrest LH,Seat,Sofia Novak,6.0,False
+SKU42,Hood Gen2,Body Panel,Daniel Okafor,2.0,False
+SKU89,Bolt M8,Fastener,Marcus Chen,250.0,False
+SKU40,Mirror Glass Gen2,Glass,Priya Patel,10.0,False
+SKU21,Window Switch,Electrical,Marcus Chen,25.0,False
+SKU52,Bolt M8 Gen2,Fastener,Sofia Novak,200.0,False
+SKU25,Lug Nut Set Gen2,Wheel & Tire,Sofia Novak,12.0,False
+SKU79,Bushing Kit RH,Suspension,Alex Rivera,24.0,False
+SKU46,Seat Cushion,Seat,Sofia Novak,4.0,False
+SKU61,Lug Nut Set,Wheel & Tire,Sofia Novak,4.0,False
+SKU37,Fender LH,Body Panel,Alex Rivera,2.0,False
+SKU53,Lug Nut Set RH,Wheel & Tire,Priya Patel,4.0,False
+SKU45,Rear Glass,Glass,Daniel Okafor,10.0,False
+SKU30,Wheel 19in Gen2,Wheel & Tire,Daniel Okafor,4.0,False
+SKU65,Fender RH,Body Panel,Marcus Chen,2.0,False
+SKU50,Pad Kit,Brake,Marcus Chen,20.0,False
+SKU66,Strut Assy RH,Suspension,Marcus Chen,20.0,False
+SKU48,Headrest Gen2,Seat,Sofia Novak,2.0,False
+SKU82,Headrest LH,Seat,Daniel Okafor,2.0,False
+SKU95,Sensor LH,Electrical,Daniel Okafor,50.0,False
+SKU35,Seat Track,Seat,Priya Patel,2.0,False
+SKU1,Fog Lamp,Lighting,Alex Rivera,10.0,False
+SKU64,Control Arm,Suspension,Daniel Okafor,10.0,False
+SKU39,Fog Lamp Gen2,Lighting,Marcus Chen,12.0,False
+SKU83,Compressor RH,HVAC,Sofia Novak,6.0,False
+SKU26,Clip Kit LH,Fastener,Alex Rivera,1000.0,False
+SKU69,Hood Gen2,Body Panel,Daniel Okafor,2.0,False
+SKU85,Door Skin RH,Body Panel,Sofia Novak,6.0,False
+SKU27,Sway Bar Link RH,Suspension,Daniel Okafor,10.0,False
+SKU20,Windshield,Glass,Marcus Chen,4.0,False
+SKU96,Rivet Pack Gen2,Fastener,Priya Patel,200.0,False
+SKU9,Window Switch Gen2,Electrical,Daniel Okafor,50.0,False
+SKU60,TPMS Sensor,Wheel & Tire,Daniel Okafor,8.0,False
+SKU91,Tire LH,Wheel & Tire,Daniel Okafor,8.0,False
+SKU19,Seat Cushion,Seat,Marcus Chen,4.0,False
+SKU75,Flange Nut Gen2,Fastener,Alex Rivera,250.0,False
+SKU10,Caliper Assy,Brake,Alex Rivera,40.0,False
+SKU77,Fuse Box,Electrical,Sofia Novak,120.0,False
+SKU8,Blower Motor,HVAC,Sofia Novak,8.0,False
+SKU73,Pad Kit,Brake,Marcus Chen,20.0,False
+SKU98,Compressor,HVAC,Sofia Novak,8.0,False
+SKU44,Bolt M8,Fastener,Marcus Chen,1000.0,False
+SKU71,Seat Cushion RH,Seat,Alex Rivera,2.0,False
+SKU84,Control Arm,Suspension,Priya Patel,24.0,False
+SKU80,Side Glass,Glass,Priya Patel,8.0,False
+SKU74,Bumper Fascia Gen2,Body Panel,Marcus Chen,6.0,False
+SKU12,Sensor,Electrical,Daniel Okafor,120.0,False
+SKU97,Wheel 19in Gen2,Wheel & Tire,Marcus Chen,4.0,False
+SKU63,Fender Gen2,Body Panel,Alex Rivera,4.0,False
+SKU32,Fender LH,Body Panel,Alex Rivera,6.0,False
+SKU18,Brake Line RH,Brake,Daniel Okafor,40.0,False
+SKU54,Fog Lamp Gen2,Lighting,Priya Patel,12.0,False
+SKU70,Headlamp Assy LH,Lighting,Marcus Chen,8.0,False
+SKU58,Flange Nut Gen2,Fastener,Sofia Novak,250.0,False
+SKU51,TPMS Sensor Gen2,Wheel & Tire,Sofia Novak,16.0,False
+SKU87,Blower Motor RH,HVAC,Daniel Okafor,8.0,False
+SKU62,Mirror Glass RH,Glass,Daniel Okafor,10.0,False

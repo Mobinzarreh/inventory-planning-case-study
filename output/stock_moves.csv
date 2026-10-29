@@ -1,0 +1,49 @@
+part_number,from_site,to_site,pieces,pallets,needed_from,route
+SKU98,GDC,PDC2,926,115.75,2026-10-22,usual route
+SKU58,PDC1,GDC,275,1.1,2026-12-01,check if a transfer is possible
+SKU72,PDC2,GDC,235,11.75,2026-11-01,check if a transfer is possible
+SKU54,PDC1,GDC,146,12.17,2026-12-30,check if a transfer is possible
+SKU44,PDC3,PDC1,109,0.11,2026-10-22,check if a transfer is possible
+SKU72,PDC2,PDC3,76,3.8,2026-10-25,check if a transfer is possible
+SKU89,GDC,PDC3,57,0.23,2026-10-22,usual route
+SKU10,PDC1,GDC,54,1.35,2026-11-11,check if a transfer is possible
+SKU27,PDC1,GDC,46,4.6,2026-12-01,check if a transfer is possible
+SKU74,PDC1,PDC2,38,6.33,2026-12-01,check if a transfer is possible
+SKU1,GDC,PDC2,26,2.6,2026-11-21,usual route
+SKU95,PDC1,PDC3,23,0.46,2026-11-25,check if a transfer is possible
+SKU79,PDC2,PDC3,22,0.92,2026-10-22,check if a transfer is possible
+SKU47,PDC3,GDC,20,1.25,2027-01-01,check if a transfer is possible
+SKU47,PDC3,PDC2,16,1.0,2026-11-27,check if a transfer is possible
+SKU19,PDC1,PDC3,15,3.75,2026-10-24,check if a transfer is possible
+SKU80,GDC,PDC1,14,1.75,2026-11-14,usual route
+SKU9,PDC1,PDC3,13,0.26,2026-10-22,check if a transfer is possible
+SKU38,GDC,PDC1,12,0.12,2026-10-30,usual route
+SKU70,PDC2,PDC3,12,1.5,2026-11-03,check if a transfer is possible
+SKU71,GDC,PDC1,12,6.0,2026-10-23,usual route
+SKU20,PDC2,PDC3,11,2.75,2026-11-03,check if a transfer is possible
+SKU30,PDC3,GDC,11,2.75,2027-01-01,check if a transfer is possible
+SKU33,GDC,PDC3,11,0.01,2026-10-22,usual route
+SKU79,PDC2,GDC,10,0.42,2027-01-02,check if a transfer is possible
+SKU82,PDC2,GDC,10,5.0,2026-10-29,check if a transfer is possible
+SKU29,PDC1,GDC,10,0.5,2026-11-01,check if a transfer is possible
+SKU81,PDC2,GDC,9,0.75,2027-01-22,check if a transfer is possible
+SKU48,PDC1,GDC,9,4.5,2026-11-11,check if a transfer is possible
+SKU82,PDC2,PDC1,8,4.0,2026-10-26,check if a transfer is possible
+SKU74,PDC1,PDC3,7,1.17,2026-10-24,check if a transfer is possible
+SKU22,PDC1,GDC,7,1.17,2027-01-13,check if a transfer is possible
+SKU70,PDC2,GDC,6,0.75,2026-11-01,check if a transfer is possible
+SKU49,PDC2,GDC,6,1.5,2026-12-08,check if a transfer is possible
+SKU99,PDC1,PDC2,5,0.83,2026-11-05,check if a transfer is possible
+SKU68,GDC,PDC2,4,0.1,2026-10-25,usual route
+SKU34,PDC2,GDC,4,0.67,2026-12-01,check if a transfer is possible
+SKU20,PDC2,GDC,3,0.75,2026-11-01,check if a transfer is possible
+SKU60,GDC,PDC3,2,0.25,2026-10-27,usual route
+SKU79,PDC2,PDC1,2,0.08,2026-10-24,check if a transfer is possible
+SKU91,GDC,PDC2,2,0.25,2026-10-24,usual route
+SKU82,PDC2,PDC3,2,1.0,2026-12-28,check if a transfer is possible
+SKU68,GDC,PDC3,2,0.05,2026-10-28,usual route
+SKU3,GDC,PDC1,1,0.01,2026-10-30,usual route
+SKU42,PDC1,PDC2,1,0.5,2026-10-29,check if a transfer is possible
+SKU37,PDC2,PDC1,1,0.5,2027-01-13,check if a transfer is possible
+SKU60,GDC,PDC1,1,0.12,2026-10-31,usual route
+SKU99,PDC1,PDC3,1,0.17,2026-10-26,check if a transfer is possible
