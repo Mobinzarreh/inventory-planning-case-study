@@ -7,8 +7,8 @@ My take-home for the service parts planning case. The raw data is in `data/`, ex
 Python 3.11. In PowerShell:
 
 ```powershell
-git clone https://github.com/Mobinzarreh/tesla-planning-case-study.git
-cd tesla-planning-case-study
+git clone https://github.com/Mobinzarreh/inventory-planning-case-study.git
+cd inventory-planning-case-study
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
