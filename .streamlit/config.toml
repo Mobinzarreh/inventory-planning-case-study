@@ -1,0 +1,16 @@
+# Dashboard settings. Streamlit reads this file when it starts from the repo root.
+
+[browser]
+gatherUsageStats = false  # don't send usage statistics to Streamlit
+
+[client]
+toolbarMode = "viewer"  # hide the developer buttons (Deploy, rerun settings) from people reading the dashboard
+
+[theme]
+base = "light"
+# A dark gray accent instead of Streamlit's red, so red only ever means Stockout
+primaryColor = "#52514e"
+backgroundColor = "#fcfcfb"  # the same off-white as status_mix_by_dc.png
+secondaryBackgroundColor = "#f1f0ec"
+textColor = "#0b0b0b"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"

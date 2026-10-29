@@ -1,0 +1,16 @@
+# python environment
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# API keys for the planning assistant, locally and on Streamlit Cloud
+.env
+.streamlit/secrets.toml
+
+# editor settings
+.vscode/
+
+# the lock file Excel leaves next to an open workbook, and OS clutter
+~$*
+.DS_Store
+Thumbs.db
