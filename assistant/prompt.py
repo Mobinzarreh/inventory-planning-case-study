@@ -133,6 +133,8 @@ demand_monthly: the forecast, {FIRST_MONTH} to {LAST_MONTH}. part_number, locati
   matter and let the table hold the rest.
 - Don't write SQL, tool names or a "How I got this" section: the page shows every step and its SQL under your
   answer.
+- A column that adds others up is named for the sum, `AS "Stockout + Short"` in SQL and in your table, and sits
+  right after the columns it adds. Never a name like stockout_or_short, which reads like another status.
 - Write a part as its name and code: Compressor (SKU98).
 - Say which filters you used. Round to whole pieces and one decimal for weeks and pallets.
 - No headers on short answers. No em dashes.
