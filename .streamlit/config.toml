@@ -8,9 +8,20 @@ toolbarMode = "viewer"  # hide the developer buttons (Deploy, rerun settings) fr
 
 [theme]
 base = "light"
-# A dark gray accent instead of Streamlit's red, so red only ever means Stockout
-primaryColor = "#52514e"
-backgroundColor = "#fcfcfb"  # the same off-white as status_mix_by_dc.png
-secondaryBackgroundColor = "#f1f0ec"
-textColor = "#0b0b0b"
+# Tesla's palette: red, charcoal, gray and two light grays. Red is the accent of the app's frame (buttons, focus,
+# the agent's tile); the charts keep their own colors, where red means Stockout
+primaryColor = "#cc0000"
+backgroundColor = "#fafafa"
+secondaryBackgroundColor = "#f2f2f2"
+textColor = "#222222"
+borderColor = "#e0e0e0"
 font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+
+[theme.sidebar]
+# a charcoal sidebar with light text, the strongest part of the Tesla look; no chart is drawn here
+backgroundColor = "#222222"
+secondaryBackgroundColor = "#2e2e2e"
+textColor = "#f2f2f2"
+primaryColor = "#cc0000"
+linkColor = "#ffffff"
+borderColor = "#3a3a3a"

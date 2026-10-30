@@ -1,6 +1,7 @@
-"""The dashboard. Run from the repo root: .venv\\Scripts\\python.exe -m streamlit run app.py
+"""The app: the planning assistant, then the dashboard. Run from the repo root:
+.venv\\Scripts\\python.exe -m streamlit run app.py
 
-It only reads the tables in output/, so run run_all.py first. Every number on every page comes from there.
+Both only read the tables in output/, so run run_all.py first. Every number on every page comes from there.
 """
 import pandas as pd
 import streamlit as st
@@ -8,6 +9,20 @@ import streamlit as st
 from dashboard.data import load_tables, missing_tables
 from src.config import FORECAST_MONTHS, LOCATIONS, SNAPSHOT_DATE
 from src.supply_review import END_DATE
+
+REPO_URL = "https://github.com/Mobinzarreh/inventory-planning-case-study"
+# The agent's entry is the first section of the sidebar. A red outline and an "AI agent" tag, in Tesla red on the
+# charcoal sidebar, make it stand out on every page
+AGENT_IN_SIDEBAR = """
+<style>
+[data-testid="stSidebarNavItems"] > div:first-child [data-testid="stSidebarNavLink"] {
+    border: 1px solid #cc0000; background: rgba(204, 0, 0, 0.14); font-weight: 600;}
+[data-testid="stSidebarNavItems"] > div:first-child [data-testid="stSidebarNavLink"]::after {
+    content: "AI agent"; flex: none; white-space: nowrap; margin-left: auto; padding: 0.1rem 0.5rem;
+    border-radius: 999px; background: #cc0000; color: #ffffff; font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;}
+</style>
+"""
 
 
 def sidebar_filters(pairs) -> None:
@@ -33,18 +48,24 @@ if missing:
     st.error(f"These output tables are missing: {', '.join(missing)}. Run run_all.py first.")
     st.stop()
 
-# Results first for the planning manager, then how we got there
+# The agent opens first, in its own section. Then the dashboard: results for the planning manager, then how we
+# got there
+assistant = st.Page("assistant/page.py", title="Ask the agent", icon=":material/auto_awesome:", default=True)
 pages = {
-    "Results": [
-        st.Page("dashboard/overview.py", title="Overview", icon=":material/dashboard:", default=True),
+    "AI planning agent": [assistant],
+    "Dashboard: results": [
+        st.Page("dashboard/overview.py", title="Overview", icon=":material/dashboard:"),
         st.Page("dashboard/actions.py", title="Actions", icon=":material/checklist:"),
         st.Page("dashboard/worked_example.py", title="Worked example: SKU98", icon=":material/search:"),
     ],
-    "How we got here": [
+    "Dashboard: how we got here": [
         st.Page("dashboard/data_quality.py", title="Data quality", icon=":material/rule:"),
         st.Page("dashboard/how_it_works.py", title="How it works", icon=":material/account_tree:"),
     ],
 }
 navigation = st.navigation(pages)
-sidebar_filters(load_tables()["inventory_health"])
+st.html(AGENT_IN_SIDEBAR)
+if navigation.url_path != assistant.url_path:  # the filters belong to the dashboard, the agent has its own
+    sidebar_filters(load_tables()["inventory_health"])
 navigation.run()
+st.sidebar.caption(f"Built by Mobin Zarreh · [Source on GitHub]({REPO_URL})")

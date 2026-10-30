@@ -4,7 +4,8 @@ import streamlit as st
 
 from dashboard.charts import (NO_TOOLBAR, TIED_UP, biggest_stockout_rise, most_at_risk, status_change_takeaway,
                               status_counts, status_mix_chart, status_transitions, stockout_shift,
-                              stockout_shift_chart, tied_up_chart, tied_up_pallets, tied_up_takeaway, transition_chart)
+                              stockout_shift_chart, tied_up_chart, tied_up_pallets, tied_up_takeaway, transition_chart,
+                              unknown_parts_text)
 from dashboard.data import filter_pairs, load_tables, number_table
 
 
@@ -27,15 +28,6 @@ def headline_tiles(pairs: pd.DataFrame) -> None:
                          "(pieces ÷ qpc, per part).")
 
 
-def unknown_parts_note(pairs: pd.DataFrame) -> None:
-    """Parts missing from the part master have no qpc, so they're left off the pallet chart and noted in pieces."""
-    unknown = pairs[~pairs["in_part_master"]]
-    if unknown.empty:
-        return
-    names = ", ".join(sorted(unknown["part_number"]))
-    st.caption(f"Not in the chart: {names}, which are missing from the part master. They have "
-               f"{unknown['on_hand_qty'].sum():,.0f} pieces on hand and {unknown['supply_qty'].sum():,.0f} incoming, "
-               "and no qpc to turn into pallets.")
 
 
 st.title("Overview")
@@ -83,7 +75,9 @@ st.caption("Stock that costs space and money without serving demand, in pallet e
 pallets = tied_up_pallets(shown)
 st.plotly_chart(tied_up_chart(pallets), config=NO_TOOLBAR)
 st.markdown(tied_up_takeaway(pallets))
-unknown_parts_note(shown)
+unknown_note = unknown_parts_text(shown)  # parts with no qpc, left off the chart
+if unknown_note:
+    st.caption(unknown_note)
 with st.expander("Numbers behind the chart"):
     readable = {"on_hand": "All pallets on hand"}
     for column, details in TIED_UP.items():

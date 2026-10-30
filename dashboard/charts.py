@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
+from dashboard.data import NOT_IN_MASTER
 from src.charts import (AXIS_LINE, INK, INK_MUTED, INK_SECONDARY, LABEL_INK, LEGEND_TEXT, MIN_LABEL_SHARE,
                         STATUS_COLORS, SURFACE)
 from src.config import LOCATIONS, SNAPSHOT_DATE
@@ -26,13 +27,18 @@ TIED_UP = {
 }
 
 
-def status_counts(pairs: pd.DataFrame) -> pd.DataFrame:
-    """Pairs in each status per site, plus a total row, in the order the chart shows them."""
-    counts = pd.crosstab(pairs["location"], pairs["status"])
+def status_counts(pairs: pd.DataFrame, by: str = "location") -> pd.DataFrame:
+    """Pairs in each status per site (or per part type or planner), plus a total row, in the order the chart shows them."""
+    # parts missing from the part master have no part type or planner: they get their own row rather than drop out
+    groups = pairs[by].fillna(NOT_IN_MASTER)
+    counts = pd.crosstab(groups, pairs["status"])
     counts = counts.reindex(columns=STATUS_ORDER, fill_value=0)
-    sites = [site for site in LOCATIONS if site in counts.index]
-    counts = counts.reindex(sites)
-    counts.loc["All sites"] = counts.sum()
+    if by == "location":
+        sites = [site for site in LOCATIONS if site in counts.index]
+        counts = counts.reindex(sites)
+        counts.loc["All sites"] = counts.sum()
+    else:
+        counts.loc["All"] = counts.sum()
     return counts
 
 
@@ -49,7 +55,8 @@ def status_mix_chart(counts: pd.DataFrame) -> go.Figure:
                     textfont={"color": LABEL_INK[status]}, customdata=counts[status],
                     hovertemplate=f"%{{y}}: %{{customdata}} pairs {status} (%{{x:.0%}})<extra></extra>")
     for site, total in counts.sum(axis=1).items():
-        fig.add_annotation(x=1.01, y=site, xref="paper", text=f"{total} pairs", showarrow=False,
+        unit = "pair" if total == 1 else "pairs"  # a group can hold a single pair, like a part type at one site
+        fig.add_annotation(x=1.01, y=site, xref="paper", text=f"{total} {unit}", showarrow=False,
                            xanchor="left", font={"color": INK_MUTED, "size": 12})
     fig.update_layout(barmode="stack", height=90 + 46 * len(counts), margin={"l": 0, "r": 70, "t": 40, "b": 0},
                       xaxis={"tickformat": ".0%", "range": [0, 1], "showgrid": False},
@@ -59,8 +66,8 @@ def status_mix_chart(counts: pd.DataFrame) -> go.Figure:
 
 
 def most_at_risk(counts: pd.DataFrame) -> str:
-    """One sentence naming the site with the largest share of pairs that are out of stock or short."""
-    sites = counts.drop(index="All sites")
+    """One sentence naming the site (or group) with the largest share of pairs that are out of stock or short."""
+    sites = counts.iloc[:-1]  # the last row is the total
     at_risk = sites["Stockout"] + sites["Short"]
     share = at_risk / sites.sum(axis=1)
     site = share.idxmax()
@@ -185,6 +192,17 @@ def tied_up_chart(pallets: pd.DataFrame) -> go.Figure:
                       uniformtext={"minsize": 10, "mode": "hide"},  # hide a count that doesn't fit its segment
                       legend={"orientation": "h", "x": 0, "y": 1.02, "yanchor": "bottom", "traceorder": "normal"})
     return fig
+
+
+def unknown_parts_text(pairs: pd.DataFrame) -> str:
+    """Parts missing from the part master have no qpc, so the pallet chart leaves them out. This says so, in pieces."""
+    unknown = pairs[~pairs["in_part_master"]]
+    if unknown.empty:
+        return ""
+    names = ", ".join(sorted(unknown["part_number"]))
+    return (f"Not in the chart: {names}, which are missing from the part master. They have "
+            f"{unknown['on_hand_qty'].sum():,.0f} pieces on hand and {unknown['supply_qty'].sum():,.0f} incoming, "
+            "and no qpc to turn into pallets.")
 
 
 def tied_up_takeaway(pallets: pd.DataFrame) -> str:
