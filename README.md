@@ -52,7 +52,9 @@ Main columns in `inventory_health`:
 
 ## Dashboard
 
-An interactive view of the same results, for reading and deciding rather than for computing. Run `run_all.py` first, then:
+An interactive view of the same results, for reading and deciding rather than for computing. A live copy runs at https://inventory-planning-case-study-a3gaqkykrzjhyq5mqi875s.streamlit.app/ (if nobody has opened it for a while, it takes a minute to wake up).
+
+To run it locally, run `run_all.py` first, then:
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run app.py
