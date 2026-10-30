@@ -50,17 +50,57 @@ Main columns in `inventory_health`:
 - `restock_not_received`: planned restock for a PDC that the GDC cannot send by Jan 31 (5.5).
 - `flags`: the issues from the flag list for this part and location.
 
-## Dashboard
+## Planning agent
 
-An interactive view of the same results, for reading and deciding rather than for computing. A live copy runs at https://inventory-planning-case-study-a3gaqkykrzjhyq5mqi875s.streamlit.app/ (if nobody has opened it for a while, it takes a minute to wake up).
+The app opens on the planning agent, the bonus task: ask about stock, supply and demand in plain English, and get answers, charts and breakdowns. A live copy runs at https://inventory-planning-case-study-a3gaqkykrzjhyq5mqi875s.streamlit.app/ (if nobody has opened it for a while, it takes a minute to wake up). The dashboard is in the same app, in its own sidebar sections.
 
-To run it locally, run `run_all.py` first, then:
+![The planning agent's opening screen](docs/agent_welcome.png)
+
+How it works:
+- A LangChain agent (`create_agent`, a ReAct loop on LangGraph) picks a tool, reads the result, and repeats until it can answer. It has four tools:
+  - `run_sql`: one read-only SQL query on an in-memory SQLite copy of the `output/` tables.
+  - `show_chart`: the dashboard's own charts (status mix, stockouts today and on Jan 31, pallets tied up, when pairs run out, one part's demand and stock), each with the takeaway sentence the code writes.
+  - `make_chart`: any other bar or line chart, from one query.
+  - `what_if_move`: weeks of supply and status at both sites if stock moved today.
+- The numbers come from the data and the code, never from the model. Each tool sends its full table or chart straight to the page, and the model sees only the first 20 rows, enough to write its answer. Its advice comes from the pipeline's verdict and action columns. Under every answer, **How I got this** shows each step and its SQL.
+- It remembers the conversation, so a follow-up like "which of those have supply on the way?" works. **New conversation** starts over.
+- The model is picked in the sidebar: Claude Sonnet 5.5 (default), Claude Opus 5.5 or GPT-5.5, through ASU's CreateAI gateway. Six models were tested, and these three got every answer right and made nothing up (`ASSUMPTIONS.md` 5.6).
+
+To run it locally, put the key in a `.env` file in the repo root (`.gitignore` keeps it out of git):
+
+```
+ASU_CREATEAI_API_KEY=...
+# optional: trace every run in LangSmith
+LANGSMITH_API_KEY=...
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=inventory-planning-assistant
+```
+
+Then run `run_all.py` and start the app:
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-It opens in the browser at http://localhost:8501. The dashboard only reads the tables in `output/` and recalculates nothing, so every number matches the CSVs and the workbook. The sidebar filters by site, planner and part type. Parts show by name with the code in brackets, like Compressor (SKU98). The code always stays, because 21 names are shared by two or three parts. There are five pages:
+It opens in the browser at http://localhost:8501. Without the key, the agent page says so and the dashboard pages still work. The agent also runs in the terminal. Several questions in one run are one conversation:
+
+```powershell
+.\.venv\Scripts\python.exe -m assistant.ask "Show me all Excess parts for Daniel Okafor at PDC2" "Which of those have supply on the way?"
+```
+
+**Test set.** `.\.venv\Scripts\python.exe -m assistant.check` asks 18 questions: Tesla's four examples, more charts, supply and actions, a what-if, a follow-up that needs memory, and five traps (a part that doesn't exist, a part missing from the part master, a name shared by three parts, a money question the data can't answer, an off-topic request). Each answer must use a fitting tool, name the right facts (worked out with pandas from `output/` at run time), and contain no number the model didn't see in a tool result. Add `--model="GPT-5.5"` to test another model. All three models pass 18 of 18.
+
+**Demo.** Tesla's second and fourth examples, and a what-if:
+
+![Status by part type at the GDC, drawn with the dashboard's chart](docs/agent_status_by_part_type.png)
+
+![No-demand pallets per site, with the SQL behind the answer opened](docs/agent_no_demand_pallets.png)
+
+![What if 926 pieces of SKU98 move from the GDC to PDC2](docs/agent_what_if.png)
+
+## Dashboard
+
+An interactive view of the same results, for reading and deciding rather than for computing. It's in the same app as the planning agent: start it as above, and the dashboard pages are below the agent in the sidebar. The dashboard only reads the tables in `output/` and recalculates nothing, so every number matches the CSVs and the workbook. The sidebar filters by site, planner and part type. Parts show by name with the code in brackets, like Compressor (SKU98). The code always stays, because 21 names are shared by two or three parts. There are five pages:
 
 - **Overview:** headline numbers, the status mix by site, what changes by Jan 31, and the pallets tied up in excess and no-demand stock.
 - **Actions:** GDC parts to order, PO lines by verdict, suggested moves and when pairs run out, each list with a download button.
@@ -71,7 +111,9 @@ It opens in the browser at http://localhost:8501. The dashboard only reads the t
 ## Code layout
 
 - `run_all.py` runs every step in order.
-- `app.py` starts the dashboard. Its pages and charts are in `dashboard/` (`data.py` reads `output/`, `charts.py` and `part_charts.py` draw the charts, one file per page).
+- `app.py` starts the app: the planning agent first, then the dashboard. The dashboard's pages and charts are in `dashboard/` (`data.py` reads `output/`, `charts.py` and `part_charts.py` draw the charts, one file per page).
+- `assistant/` holds the planning agent: `agent.py` (the models and the agent), `prompt.py` (the system prompt and the guide to the tables), `tools.py` (the four tools), `database.py` (the read-only SQLite copy of `output/`), `page.py` (the chat page), `ask.py` (the terminal version) and `check.py` (the test set).
+- `docs/` holds the demo screenshots.
 - `src/` holds one module per step. Each module also runs on its own and prints a few hand checks, for example `.\.venv\Scripts\python.exe -m src.supply_review`. The modules are:
   - `config.py`: paths, snapshot date, forecast months.
   - `load_raw.py`: reads the raw CSVs, every column as text (ASSUMPTIONS.md 2.2).
