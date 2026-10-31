@@ -2,6 +2,7 @@
 the DC summary, the supply review tables and the full flag list. Each is written as a CSV in
 output/, and all of them together as one Excel workbook. The day-by-day stock is CSV only."""
 import pandas as pd
+from xlsxwriter.utility import xl_col_to_name
 
 from src.clean import FLAG_COLUMNS
 from src.config import FORECAST_MONTHS, OUTPUT_DIR, ROOT
@@ -33,6 +34,8 @@ LINE_COLUMNS = [
     "status", "status_jan31", "run_out_date", "short_when_landing", "days_without_stock_before", "pieces_above_26w",
     "stock_jan31", "no_demand_reason", "qpc",
 ]
+# labels that look like numbers but are text on purpose: as a number, rule 4.10 would read 4.1
+TEXT_LABELS = ["po_line", "rule"]
 
 
 def build_flag_list(flag_tables: list[pd.DataFrame]) -> pd.DataFrame:
@@ -82,6 +85,17 @@ def round_for_reading(table: pd.DataFrame) -> pd.DataFrame:
     return table
 
 
+def quiet_text_labels(sheet, table: pd.DataFrame) -> None:
+    """Tell Excel the label columns are text on purpose, so it marks no cell as a 'number stored as text'."""
+    ranges = []
+    for column in TEXT_LABELS:
+        if column in table.columns:
+            letter = xl_col_to_name(table.columns.get_loc(column))
+            ranges.append(f"{letter}2:{letter}{len(table) + 1}")
+    if ranges:
+        sheet.ignore_errors({"number_stored_as_text": " ".join(ranges)})
+
+
 def write_outputs(tables: dict[str, pd.DataFrame]) -> None:
     """Each table as a CSV in output/, and all but the CSV-only ones as sheets of one Excel workbook."""
     OUTPUT_DIR.mkdir(exist_ok=True)
@@ -92,9 +106,11 @@ def write_outputs(tables: dict[str, pd.DataFrame]) -> None:
         print(f"  wrote {path.relative_to(ROOT)} ({len(table)} rows)")
     sheets = {name: table for name, table in tables.items() if name not in CSV_ONLY}
     workbook = OUTPUT_DIR / WORKBOOK
-    with pd.ExcelWriter(workbook, date_format="YYYY-MM-DD", datetime_format="YYYY-MM-DD") as writer:
+    with pd.ExcelWriter(workbook, engine="xlsxwriter", date_format="YYYY-MM-DD",
+                        datetime_format="YYYY-MM-DD") as writer:
         for name, table in sheets.items():
             if name == "inventory_health":
                 table = table.drop(columns=DETAIL_COLUMNS)  # the planner's view, the CSV keeps every column
             table.to_excel(writer, sheet_name=name, index=False, freeze_panes=(1, 2))
+            quiet_text_labels(writer.sheets[name], table)
     print(f"  wrote {workbook.relative_to(ROOT)} ({len(sheets)} sheets)")
