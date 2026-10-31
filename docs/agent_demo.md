@@ -1,6 +1,6 @@
 # Planning agent: demo
 
-Seven questions to the planning agent: Tesla's four examples, then three more. The screenshots come from the app on Oct 30, 2026, with the default model (Claude Sonnet 5.5). I checked every number in every answer against the files in `output/`.
+Seven questions to the planning agent: Tesla's four examples, then three more. The screenshots come from the app on Oct 30, 2026, with the default model (Claude Sonnet 5.5).
 
 The app is also live, so you can ask your own questions: https://inventory-planning-case-study-a3gaqkykrzjhyq5mqi875s.streamlit.app/ (it takes a minute to wake up if nobody has opened it for a while). The wording changes a little from run to run, but the numbers come from the tables. Under each answer, **How I got this** shows every tool call and its SQL.
 

@@ -42,7 +42,7 @@ PROMISES = ("Numbers from the planning tables, never from the model · Read-only
 # a four-point sparkle, the usual mark for AI, in white on the agent's dark tile. A character rather than an SVG,
 # which st.html strips out
 SPARKLE = "✦"
-# Tesla's palette (.streamlit/config.toml): a charcoal card with red as the agent's own color. Red stays in this
+# the app's palette (.streamlit/config.toml): a charcoal card with red as the agent's own color. Red stays in this
 # frame and out of the answers, where the charts use it for Stockout
 STYLE = """
 <style>
@@ -276,8 +276,7 @@ def sidebar() -> str:
     names = list(MODELS)
     model_name = st.sidebar.selectbox("Model", names, index=names.index(DEFAULT_MODEL), key="model",
                                       on_change=new_conversation,
-                                      help="All three got every test answer right and made nothing up. "
-                                           "Changing the model starts a new conversation.")
+                                      help="Changing the model starts a new conversation.")
     st.sidebar.button("New conversation", icon=":material/add_comment:", on_click=new_conversation, width="stretch")
     st.sidebar.divider()
     st.sidebar.caption("The agent reads the same tables as the dashboard. The model picks a tool and writes "

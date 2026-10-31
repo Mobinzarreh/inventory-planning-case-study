@@ -169,10 +169,9 @@ Nothing is dropped or changed silently: every row set aside, changed or odd gets
 **5.6 The planning agent (the bonus).** A language model answers planning questions in plain English but never computes a number. It picks one of four tools (`run_sql`, `show_chart`, `make_chart`, `what_if_move`) and their inputs, such as a read-only SQL query, and writes the words. Every number, table and chart comes from `output/` through our code, because the output tables already hold every derived number and recommendation.
 - Each tool sends its full table or chart straight to the page. The model sees only a preview (the first 20 rows and the row count), enough to write its answer, and its advice comes from the pipeline's verdict and action columns. "How I got this" under each answer shows every step and its SQL.
 - The what-if shows today's WOS and status at both sites (5.2, 5.3). It does not rerun the projection to Jan 31, and the answer says so.
-- Six models were tried through ASU's CreateAI gateway. Claude Sonnet 5.5 (the default), Claude Opus 5.5 and GPT-5.5 got every answer right and made nothing up. The other three got a number wrong, invented one, or broke their tool calls.
-- The test set asks 18 questions: Tesla's four examples, charts, supply, a what-if, a follow-up that needs memory, and five traps (a part that doesn't exist, a part missing from the part master, a name shared by three parts, a money question the data can't answer, an off-topic request). Each answer must use a fitting tool, name the right facts (worked out with pandas from `output/`) and contain no number the model didn't see in a tool result. All three models passed 18 of 18.
+- The model runs through ASU's CreateAI gateway. Claude Sonnet 5.5 is the default, and the app also offers Claude Opus 5.5 and GPT-5.5.
 
-*Code: `planning_agent/` (`tools.py` for the tools, `prompt.py` for the rules). Test set: `planning_agent/evaluate.py`.*
+*Code: `planning_agent/` (`tools.py` for the tools, `prompt.py` for the rules).*
 
 ## 6. What I would do with more time
 

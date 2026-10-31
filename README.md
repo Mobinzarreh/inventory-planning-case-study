@@ -3,7 +3,7 @@
 My take-home for the service parts planning case: weeks of supply and status for every part at the GDC and the three PDCs, a roll-up per DC, and a review of incoming supply to Jan 31. The raw data in `data/` is exactly as received.
 
 - **Results:** `output/inventory_health_check.xlsx`
-- **Summary for the planning manager:** `output/summary_slides.pptx` (5 slides with speaker notes)
+- **Summary for the planning manager:** `output/summary_slides.pptx` (5 slides)
 - **Definitions, assumptions and what I'd do with more time:** `ASSUMPTIONS.md`
 - **Planning agent demo** (the bonus): [`docs/agent_demo.md`](docs/agent_demo.md), Tesla's four example questions and three more, with screenshots
 - **Live app** (the planning agent and a dashboard, open to try your own questions): https://inventory-planning-case-study-a3gaqkykrzjhyq5mqi875s.streamlit.app/ (it takes a minute to wake up if nobody has opened it for a while)
@@ -20,11 +20,11 @@ python -m venv .venv
 .\.venv\Scripts\python.exe run_pipeline.py
 ```
 
-`run_pipeline.py` goes from the raw CSVs to every file in `output/` in about 3 seconds. Each step prints its row counts, and the run stops if a join drops or doubles rows. To open the app locally, run `.\.venv\Scripts\python.exe -m streamlit run app.py`.
+`run_pipeline.py` goes from the raw CSVs to every table and chart in `output/` in about 3 seconds. Each step prints its row counts, and the run stops if a join drops or doubles rows. To open the app locally, run `.\.venv\Scripts\python.exe -m streamlit run app.py`.
 
 ## Output
 
-The workbook holds these seven tables as sheets. Each one is also saved as a CSV.
+The workbook holds these seven tables as sheets. Each one is also saved as a CSV, and `inventory_health.csv` also keeps the 24 monthly forecast columns and 8 helper columns that the sheet leaves out.
 
 | Table | One row is | Answers |
 |---|---|---|
@@ -40,7 +40,7 @@ The workbook holds these seven tables as sheets. Each one is also saved as a CSV
 
 ## Planning agent (bonus)
 
-The app opens on the planning agent. Ask about stock, supply and demand in plain English and get answers, charts and breakdowns. A LangChain agent picks one of four tools: read-only SQL on the output tables, the dashboard's charts, any other chart, and a what-if stock move. The numbers come from the data and the code, never from the model, and **How I got this** under each answer shows every step and its SQL. Design, models and the test set are in `ASSUMPTIONS.md` 5.6. The demo, with seven questions and their screenshots, is in [`docs/agent_demo.md`](docs/agent_demo.md).
+The app opens on the planning agent. Ask about stock, supply and demand in plain English and get answers, charts and breakdowns. A LangChain agent picks one of four tools: read-only SQL on the output tables, the dashboard's charts, any other chart, and a what-if stock move. The numbers come from the data and the code, never from the model, and **How I got this** under each answer shows every step and its SQL. The design is in `ASSUMPTIONS.md` 5.6. The demo, with seven questions and their screenshots, is in [`docs/agent_demo.md`](docs/agent_demo.md).
 
 ![The agent answering how many pallets of no-demand stock sit at each location, with the SQL behind the answer](docs/agent_demo/04_no_demand_pallets.png)
 
@@ -54,7 +54,7 @@ LANGSMITH_TRACING=true
 LANGSMITH_PROJECT=inventory-planning-assistant
 ```
 
-It also runs in the terminal, `.\.venv\Scripts\python.exe -m planning_agent.cli "Which GDC parts need an order?"`, and `-m planning_agent.evaluate` runs its 18-question test set.
+It also runs in the terminal, `.\.venv\Scripts\python.exe -m planning_agent.cli "Which GDC parts need an order?"`, and `-m planning_agent.evaluate` runs its test questions.
 
 ## Dashboard
 

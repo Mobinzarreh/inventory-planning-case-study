@@ -11,7 +11,7 @@ from src.config import FORECAST_MONTHS, LOCATIONS, SNAPSHOT_DATE
 from src.supply_review import END_DATE
 
 REPO_URL = "https://github.com/Mobinzarreh/inventory-planning-case-study"
-# The agent's entry is the first section of the sidebar. A red outline and an "AI agent" tag, in Tesla red on the
+# The agent's entry is the first section of the sidebar. A red outline and an "AI agent" tag, in the app's red on the
 # charcoal sidebar, make it stand out on every page
 AGENT_IN_SIDEBAR = """
 <style>

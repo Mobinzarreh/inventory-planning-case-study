@@ -8,7 +8,7 @@ toolbarMode = "viewer"  # hide the developer buttons (Deploy, rerun settings) fr
 
 [theme]
 base = "light"
-# Tesla's palette: red, charcoal, gray and two light grays. Red is the accent of the app's frame (buttons, focus,
+# The palette: red, charcoal, gray and two light grays. Red is the accent of the app's frame (buttons, focus,
 # the agent's tile); the charts keep their own colors, where red means Stockout
 primaryColor = "#cc0000"
 backgroundColor = "#fafafa"
@@ -18,7 +18,7 @@ borderColor = "#e0e0e0"
 font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 
 [theme.sidebar]
-# a charcoal sidebar with light text, the strongest part of the Tesla look; no chart is drawn here
+# a charcoal sidebar with light text; no chart is drawn here
 backgroundColor = "#222222"
 secondaryBackgroundColor = "#2e2e2e"
 textColor = "#f2f2f2"

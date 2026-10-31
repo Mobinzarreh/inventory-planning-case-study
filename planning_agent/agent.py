@@ -17,7 +17,7 @@ from planning_agent.tools import TOOLS, Context
 from src.config import ROOT
 
 CREATEAI_URL = "https://api-main.aiml.asu.edu/v1"  # OpenAI-compatible, one key for many providers
-# the three that got every answer right and made nothing up in the model test (ASSUMPTIONS.md 5.6)
+# the models in the app's picker, all through the same gateway (ASSUMPTIONS.md 5.6)
 MODELS = {"Claude Sonnet 5.5": "aws/claude5_5_sonnet", "Claude Opus 5.5": "aws/claude5_5_opus",
           "GPT-5.5": "openai/gpt5_5"}
 DEFAULT_MODEL = "Claude Sonnet 5.5"
@@ -27,7 +27,7 @@ load_dotenv(ROOT / ".env")  # locally. On Streamlit Cloud the keys come from its
 
 
 def chat_model(model_name: str) -> ChatOpenAI:
-    """One of the tested models through the CreateAI gateway, at temperature 0 so answers repeat."""
+    """One of the models above through the CreateAI gateway, at temperature 0 so answers repeat."""
     # a call normally takes 2 to 25 s, but the gateway now and then stalls one for over a minute: give up at
     # 45 s and retry, rather than keep the planner waiting
     return ChatOpenAI(model=MODELS[model_name], base_url=CREATEAI_URL, api_key=os.environ["ASU_CREATEAI_API_KEY"],
