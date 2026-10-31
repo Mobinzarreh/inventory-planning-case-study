@@ -1,11 +1,11 @@
 """Evidence for the WOS method (ASSUMPTIONS.md 5.2): how many months to average, how to turn
 months into weeks, and how the GDC's lumpy restock months affect the answer.
 
-Uses the master table from src/master.py, so demand per site already follows ASSUMPTIONS.md 5.1
+Uses the master table from src/master_table.py, so demand per site already follows ASSUMPTIONS.md 5.1
 and the cleaning rules in section 4 are already applied. The yardstick is the run-out time: walk
 the forecast forward from the snapshot one month at a time until today's stock is used up. The
 10 days before November have no forecast, so customers buy at November's daily rate, and the
-GDC's planned restock to the PDCs starts in November with the plan (the walk in src/wos.py).
+GDC's planned restock to the PDCs starts in November with the plan (the walk in src/weeks_of_supply.py).
 
 Read-only check. Run from the repo root: .venv\\Scripts\\python.exe exploration\\08_wos_evidence.py
 """
@@ -21,9 +21,9 @@ sys.path.insert(0, str(ROOT))  # so `src` imports work when run as a plain scrip
 from src.clean import clean_all
 from src.config import FORECAST_MONTHS, SNAPSHOT_DATE
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
-from src.wos import weeks_until_run_out
+from src.weeks_of_supply import weeks_until_run_out
 
 pd.set_option("display.width", 200)
 WINDOWS = [3, 6, 12, 24]

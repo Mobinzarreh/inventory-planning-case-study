@@ -1,4 +1,4 @@
-"""The assistant's four tools. Each returns a short text for the model and an artifact for the page.
+"""The agent's four tools. Each returns a short text for the model and an artifact for the page.
 
 The artifact holds the full table, the chart and the SQL, so they reach the planner without passing through the
 model. The model only sees the first rows, enough to write its answer.
@@ -19,11 +19,11 @@ from dashboard.charts import (biggest_stockout_rise, flags_by_issue_chart, most_
                               tied_up_chart, tied_up_pallets, tied_up_takeaway, transition_chart, unknown_parts_text)
 from dashboard.data import load_clean_demand, load_tables, part_label
 from dashboard.part_charts import daily_stock_chart, demand_chart, site_table
-from src.charts import INK_SECONDARY, STATUS_COLORS
+from src.status_chart import INK_SECONDARY, STATUS_COLORS
 from src.config import FORECAST_MONTHS, LOCATIONS
 from src.standardize import standardize_part_number
 from src.status import STATUS_ORDER, label_status
-from src.wos import WOS_MONTHS
+from src.weeks_of_supply import WOS_MONTHS
 
 MODEL_ROWS = 20  # what the model reads: enough to answer, few enough to keep each step quick
 PAGE_ROWS = 1000  # what the page shows under an answer

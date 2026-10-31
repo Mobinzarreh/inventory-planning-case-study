@@ -1,6 +1,6 @@
-"""Ask the planning assistant from the terminal. Run from the repo root:
+"""Ask the planning agent from the terminal. Run from the repo root:
 
-    .venv\\Scripts\\python.exe -m assistant.ask "How many pallets of no-demand inventory sit at each location?"
+    .venv\\Scripts\\python.exe -m planning_agent.cli "How many pallets of no-demand inventory sit at each location?"
 
 Several questions in one run are one conversation, so a follow-up can say "now only PDC1". Pick a model with
 --model="GPT-5.5" (Claude Sonnet 5.5 by default). Tables and charts show in full in the app; here you see the steps.
@@ -15,8 +15,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 streamlit.logger.set_log_level("error")  # the dashboard's cache warns when it runs outside the app, harmlessly
 
 # imported after that line, or the dashboard's loader prints its warnings first
-from assistant.agent import DEFAULT_MODEL, ask, build_agent, message_text  # noqa: E402
-from assistant.database import build_database  # noqa: E402
+from planning_agent.agent import DEFAULT_MODEL, ask, build_agent, message_text  # noqa: E402
+from planning_agent.database import build_database  # noqa: E402
 
 
 def print_step(message) -> int:

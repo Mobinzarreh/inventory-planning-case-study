@@ -1,13 +1,13 @@
 """Plotly charts for the dashboard, and the one-line takeaway under each.
 
-Colors and labels come from src/charts.py, so the PNG and the app match.
+Colors and labels come from src/status_chart.py, so the PNG and the app match.
 """
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
 from dashboard.data import NOT_IN_MASTER
-from src.charts import (AXIS_LINE, INK, INK_MUTED, INK_SECONDARY, LABEL_INK, LEGEND_TEXT, MIN_LABEL_SHARE,
+from src.status_chart import (AXIS_LINE, INK, INK_MUTED, INK_SECONDARY, LABEL_INK, LEGEND_TEXT, MIN_LABEL_SHARE,
                         STATUS_COLORS, SURFACE)
 from src.config import LOCATIONS, SNAPSHOT_DATE
 from src.status import DEAD_STOCK, STATUS_ORDER, WANTED_ELSEWHERE
@@ -159,7 +159,7 @@ def status_change_takeaway(table: pd.DataFrame) -> str:
 
 
 def tied_up_pallets(pairs: pd.DataFrame) -> pd.DataFrame:
-    """Pallet equivalents tied up at each site, split the same way as dc_summary (src/rollup.py)."""
+    """Pallet equivalents tied up at each site, split the same way as dc_summary (src/dc_summary.py)."""
     reason = pairs["no_demand_reason"]
     pallets = pd.DataFrame({
         "above_26w": pairs["pallets_above_26w"],

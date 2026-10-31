@@ -1,19 +1,19 @@
 """Run the whole analysis, from the raw CSVs in data/ to the files in output/.
 
-Run from the repo root: .venv\\Scripts\\python.exe run_all.py
+Run from the repo root: .venv\\Scripts\\python.exe run_pipeline.py
 Each step prints its own checks (row counts and totals), so a row lost or doubled in a join shows up here.
 """
-from src.charts import plot_status_mix
+from src.status_chart import plot_status_mix
 from src.clean import clean_all, save_clean_tables
 from src.config import OUTPUT_DIR
 from src.load_raw import read_all_raw
-from src.master import build_master
-from src.output import LINE_COLUMNS, build_flag_list, build_pair_table, select_columns, write_outputs
-from src.rollup import build_dc_summary
+from src.master_table import build_master
+from src.write_outputs import LINE_COLUMNS, build_flag_list, build_pair_table, select_columns, write_outputs
+from src.dc_summary import build_dc_summary
 from src.standardize import standardize_all, standardizing_log
 from src.status import add_status
 from src.supply_review import review_supply
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 
 def main() -> None:

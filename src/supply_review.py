@@ -14,10 +14,10 @@ import pandas as pd
 from src.clean import FLAG_COLUMNS, clean_all
 from src.config import FORECAST_MONTHS, SNAPSHOT_DATE
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 from src.status import DEAD_STOCK, EXCESS_WEEKS, UNKNOWN_PART, WANTED_ELSEWHERE, add_status, label_status
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 END_DATE = pd.Timestamp("2027-01-31")  # all open supply lands by Jan 12, and it is the same three months as WOS (5.2)
 DAYS = pd.date_range(SNAPSHOT_DATE, END_DATE)

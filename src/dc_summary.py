@@ -6,10 +6,10 @@ import pandas as pd
 from src.clean import clean_all
 from src.config import LOCATIONS
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 from src.status import DEAD_STOCK, EXCESS_WEEKS, STATUS_ORDER, WANTED_ELSEWHERE, add_status
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 WATCH_WEEKS = 13  # Healthy pairs above this go on the watch list (5.3)
 

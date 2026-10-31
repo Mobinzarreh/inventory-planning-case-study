@@ -20,10 +20,10 @@ sys.path.insert(0, str(ROOT))  # so `src` imports work when run as a plain scrip
 import src.supply_review as review
 from src.clean import clean_all
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 from src.status import add_status
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 pd.set_option("display.width", 220)
 clean_tables, _ = clean_all(standardize_all(read_all_raw()))

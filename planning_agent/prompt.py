@@ -1,14 +1,14 @@
-"""The assistant's system prompt: its rules, the definitions it explains, and a guide to the tables it queries.
+"""The agent's system prompt: its rules, the definitions it explains, and a guide to the tables it queries.
 
 Thresholds and dates come from the pipeline's own constants, so the prompt can't drift from the code.
 """
 import pandas as pd
 
 from src.config import FORECAST_MONTHS, SNAPSHOT_DATE
-from src.rollup import WATCH_WEEKS
+from src.dc_summary import WATCH_WEEKS
 from src.status import EXCESS_WEEKS, SHORT_WEEKS
 from src.supply_review import END_DATE
-from src.wos import WOS_WEEKS
+from src.weeks_of_supply import WOS_WEEKS
 
 TODAY = f"{SNAPSHOT_DATE:%b} {SNAPSHOT_DATE.day}, {SNAPSHOT_DATE.year}"  # Oct 22, 2026
 JAN_31 = f"{END_DATE:%b} {END_DATE.day}, {END_DATE.year}"

@@ -1,4 +1,4 @@
-"""The planning assistant: a LangChain agent on ASU CreateAI with the four tools and in-memory chat memory.
+"""The planning agent: a LangChain agent on ASU CreateAI with the four tools and in-memory chat memory.
 
 The agent is a ReAct loop: the model picks a tool, reads what comes back, and repeats until it can answer.
 """
@@ -12,8 +12,8 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from sqlalchemy import Engine
 
-from assistant.prompt import RULES
-from assistant.tools import TOOLS, Context
+from planning_agent.prompt import RULES
+from planning_agent.tools import TOOLS, Context
 from src.config import ROOT
 
 CREATEAI_URL = "https://api-main.aiml.asu.edu/v1"  # OpenAI-compatible, one key for many providers

@@ -1,9 +1,10 @@
 """The planning agent: ask about the inventory in plain English, get answers, charts and breakdowns.
 
 The model only picks a tool and its inputs. Every number, table and chart comes from the planning tables and our
-code (assistant/tools.py), and reaches the page without passing through the model.
+code (planning_agent/tools.py), and reaches the page without passing through the model.
 """
 import os
+import threading
 import time
 import uuid
 
@@ -16,9 +17,9 @@ from langgraph.errors import GraphRecursionError
 from sqlalchemy import Engine
 from streamlit.errors import StreamlitSecretNotFoundError
 
-from assistant.agent import DEFAULT_MODEL, MODELS, ask, build_agent, message_text
-from assistant.database import build_database
-from assistant.tools import CHART_TITLES, PAGE_ROWS, readable
+from planning_agent.agent import DEFAULT_MODEL, MODELS, ask, build_agent, message_text
+from planning_agent.database import build_database
+from planning_agent.tools import CHART_TITLES, PAGE_ROWS, readable
 from dashboard.charts import NO_TOOLBAR
 from dashboard.data import number_columns
 
@@ -98,9 +99,10 @@ def agent_for(model_name: str):
 
 
 def new_conversation() -> None:
-    """A fresh thread: the agent forgets the earlier questions."""
+    """A fresh thread: the agent forgets the earlier questions. A question still running finishes in the old one."""
     st.session_state["thread_id"] = str(uuid.uuid4())
     st.session_state["turn_notes"] = {}
+    st.session_state.pop("job", None)
 
 
 def turns(messages: list) -> list[dict]:
@@ -198,36 +200,73 @@ def show_turn(turn: dict) -> None:
             st.caption(note)
 
 
-def run_question(agent, question: str, model_name: str) -> None:
-    """Ask the agent, showing each step live. The finished turn is drawn from memory on the next run."""
-    with st.chat_message("user", avatar=AVATARS["user"]):
-        st.markdown(question)
-    with st.chat_message("assistant", avatar=AVATARS["assistant"]):
-        start, steps = time.time(), 0
-        with st.status("Thinking...", expanded=False) as status:
-            for message in ask(agent, question, st.session_state["thread_id"], shared_database()):
-                for call in getattr(message, "tool_calls", []):
-                    steps += 1
-                    status.update(label=step_label(call))
-                    st.write(step_label(call))
-            status.update(label="Done", state="complete")
-    messages = agent.get_state({"configurable": {"thread_id": st.session_state["thread_id"]}}).values["messages"]
-    question_id = turns(messages)[-1]["question"].id
-    st.session_state["turn_notes"][question_id] = f"{model_name} · {count(steps, 'step')} · {time.time() - start:.0f} s"
+def run_job(job: dict, agent, thread_id: str, engine: Engine) -> None:
+    """Run one question to the end in a background thread, writing each step to the shared memory.
 
-
-def ask_safely(agent, question: str, model_name: str) -> None:
-    """Run a question, and turn a failure into a plain message. A failed turn starts a fresh conversation."""
+    Streamlit stops the page's script when the visitor clicks another page, so the agent can't run inside it:
+    an answer would be lost halfway. The page only watches this job, and finds the answer in memory later.
+    """
     try:
-        run_question(agent, question, model_name)
-    except openai.RateLimitError:
-        st.error("The AI service is busy or has reached its usage limit. Please try again in a minute.")
-    except GraphRecursionError:
-        st.error("That question took too many steps. Try asking it in a narrower way.")
-    except openai.APIError as error:
-        st.error(f"The AI service didn't answer ({type(error).__name__}). Please try again.")
-    else:
+        for message in ask(agent, job["question"], thread_id, engine):
+            for call in getattr(message, "tool_calls", []):
+                job["steps"].append(step_label(call))
+    except Exception as error:  # the page shows it, a thread has nowhere else to report
+        job["error"] = error
+    finally:  # always marked done, or the page would wait forever
+        job["seconds"] = time.time() - job["started"]
+        job["done"] = True
+
+
+def start_job(agent, question: str, model_name: str, turns_before: int) -> None:
+    """Start the agent on a question in the background. The job lives in this visitor's session."""
+    job = {"question": question, "model": model_name, "steps": [], "started": time.time(), "done": False,
+           "error": None, "turns_before": turns_before}
+    st.session_state["job"] = job
+    worker = threading.Thread(target=run_job, args=(job, agent, st.session_state["thread_id"], shared_database()),
+                              daemon=True)
+    worker.start()
+
+
+def watch_job(job: dict) -> None:
+    """The running question with its steps live, until it is done. Leaving the page doesn't stop the job."""
+    with st.chat_message("user", avatar=AVATARS["user"]):
+        st.markdown(job["question"])
+    with st.chat_message("assistant", avatar=AVATARS["assistant"]):
+        with st.status("Thinking...", expanded=False) as status:
+            shown = 0
+            while not job["done"]:
+                steps = job["steps"]
+                for label in steps[shown:len(steps)]:
+                    st.write(label)
+                shown = len(steps)
+                current = steps[-1] if steps else "Thinking"
+                # updating the label each turn also lets Streamlit stop this loop when the visitor leaves
+                status.update(label=f"{current} · {time.time() - job['started']:.0f} s")
+                time.sleep(0.5)
+            status.update(label="Done", state="complete")
+
+
+def error_message(error: Exception) -> str:
+    """A failure in plain words. Anything unexpected is raised, so it shows as a real error."""
+    if isinstance(error, openai.RateLimitError):
+        return "The AI service is busy or has reached its usage limit. Please try again in a minute."
+    if isinstance(error, GraphRecursionError):
+        return "That question took too many steps. Try asking it in a narrower way."
+    if isinstance(error, openai.APIError):
+        return f"The AI service didn't answer ({type(error).__name__}). Please try again."
+    raise error
+
+
+def finish_job(agent, job: dict) -> None:
+    """Note the finished turn's model, steps and time, and draw it from memory. A failure starts a new conversation."""
+    del st.session_state["job"]
+    if job["error"] is None:
+        config = {"configurable": {"thread_id": st.session_state["thread_id"]}}
+        question_id = turns(agent.get_state(config).values["messages"])[-1]["question"].id
+        note = f"{job['model']} · {count(len(job['steps']), 'step')} · {job['seconds']:.0f} s"
+        st.session_state["turn_notes"][question_id] = note
         st.rerun()  # draw the finished turn from memory, with its charts and tables
+    st.error(error_message(job["error"]))
     new_conversation()  # a half-finished turn would confuse the next question
     st.caption("The next question starts a fresh conversation.")
 
@@ -286,14 +325,23 @@ model_name = sidebar()
 agent = agent_for(model_name)
 history = agent.get_state({"configurable": {"thread_id": st.session_state["thread_id"]}}).values.get("messages", [])
 
+job = st.session_state.get("job")  # a question still running, maybe from before the visitor left the page
+
 question = None
-if history:
+if history or job:
     agent_card(with_steps=False)
 else:
     question = welcome()
-for turn in turns(history):
+past = turns(history)
+if job:
+    past = past[:job["turns_before"]]  # the running question is drawn live below, not from its half-saved state
+for turn in past:
     show_turn(turn)
-typed = st.chat_input("Ask the planning agent, for example: which GDC parts need an order?")
+typed = st.chat_input("Ask the planning agent, for example: which GDC parts need an order?", disabled=job is not None)
 question = typed or question
-if question:
-    ask_safely(agent, question, model_name)
+if job:
+    watch_job(job)
+    finish_job(agent, job)
+elif question:
+    start_job(agent, question, model_name, len(past))
+    st.rerun()  # the next run watches the job, with the input box locked until it is done

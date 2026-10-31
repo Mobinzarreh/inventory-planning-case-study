@@ -27,10 +27,10 @@ sys.path.insert(0, str(ROOT))  # so `src` imports work when run as a plain scrip
 from src.clean import clean_all
 from src.config import FORECAST_MONTHS, LOCATIONS, SNAPSHOT_DATE
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 from src.status import EXCESS_WEEKS, SHORT_WEEKS, STATUS_ORDER, WANTED_ELSEWHERE, add_status
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 pd.set_option("display.width", 220)
 pd.set_option("display.max_colwidth", 60)

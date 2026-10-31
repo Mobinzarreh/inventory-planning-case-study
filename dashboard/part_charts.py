@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from src.charts import INK, INK_MUTED, INK_SECONDARY
+from src.status_chart import INK, INK_MUTED, INK_SECONDARY
 from src.config import FORECAST_MONTHS, LOCATIONS
 
 BACKORDER_FILL = "rgba(208, 59, 59, 0.15)"  # a light Stockout red: stock below zero is demand not met

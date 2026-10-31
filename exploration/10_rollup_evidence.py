@@ -1,7 +1,7 @@
 """Evidence for the DC-level roll-up (task 3): how different one-number summaries of WOS are for
 each location, what drives them, and what a status view shows that one number hides.
 
-Uses the master table with WOS and status (src/wos.py and src/status.py, ASSUMPTIONS.md 5.2 and 5.3).
+Uses the master table with WOS and status (src/weeks_of_supply.py and src/status.py, ASSUMPTIONS.md 5.2 and 5.3).
 Pallets are stock / qpc, so parts not in the part master are left out of pallet figures (4.10).
 
 Read-only check. Run from the repo root: .venv\\Scripts\\python.exe exploration\\10_rollup_evidence.py
@@ -17,10 +17,10 @@ sys.path.insert(0, str(ROOT))  # so `src` imports work when run as a plain scrip
 from src.clean import clean_all
 from src.config import LOCATIONS
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 from src.status import EXCESS_WEEKS, SHORT_WEEKS, STATUS_ORDER, add_status
-from src.wos import add_wos
+from src.weeks_of_supply import add_wos
 
 pd.set_option("display.width", 200)
 

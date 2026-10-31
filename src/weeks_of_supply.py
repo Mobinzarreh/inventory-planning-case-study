@@ -6,7 +6,7 @@ import pandas as pd
 from src.clean import clean_all
 from src.config import FORECAST_MONTHS, SNAPSHOT_DATE
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
 
 MONTH_DAYS = [pd.Period(month).days_in_month for month in FORECAST_MONTHS]

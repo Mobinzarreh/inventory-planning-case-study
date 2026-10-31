@@ -1,7 +1,7 @@
 """The planning agent's test set. Run from the repo root:
 
-    .venv\\Scripts\\python.exe -m assistant.check                    (Claude Sonnet 5.5)
-    .venv\\Scripts\\python.exe -m assistant.check --model="GPT-5.5"
+    .venv\\Scripts\\python.exe -m planning_agent.evaluate                    (Claude Sonnet 5.5)
+    .venv\\Scripts\\python.exe -m planning_agent.evaluate --model="GPT-5.5"
 
 Each question is checked three ways: the agent used a tool that fits, its answer names the right facts (worked out
 here with pandas from output/, so they stay true if the pipeline changes), and every number in the answer appears in
@@ -21,9 +21,9 @@ streamlit.logger.set_log_level("error")  # the dashboard's cache warns when it r
 os.environ["LANGSMITH_PROJECT"] = "inventory-planning-assistant-dev"  # test runs stay out of the real project
 
 # imported after those lines, or the warnings print and the traces land in the real project
-from assistant.agent import DEFAULT_MODEL, ask, build_agent, message_text  # noqa: E402
-from assistant.database import build_database  # noqa: E402
-from assistant.prompt import RULES  # noqa: E402
+from planning_agent.agent import DEFAULT_MODEL, ask, build_agent, message_text  # noqa: E402
+from planning_agent.database import build_database  # noqa: E402
+from planning_agent.prompt import RULES  # noqa: E402
 from dashboard.data import load_tables  # noqa: E402
 from src.config import LOCATIONS  # noqa: E402
 

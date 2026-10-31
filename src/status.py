@@ -4,9 +4,9 @@ import pandas as pd
 from src.clean import FLAG_COLUMNS, clean_all
 from src.config import FORECAST_MONTHS, SNAPSHOT_DATE
 from src.load_raw import read_all_raw
-from src.master import build_master
+from src.master_table import build_master
 from src.standardize import standardize_all
-from src.wos import add_wos, weeks_until_run_out
+from src.weeks_of_supply import add_wos, weeks_until_run_out
 
 SHORT_WEEKS = 4  # about one month: most sites are restocked every month
 EXCESS_WEEKS = 26  # half a year: above a normal restock delivery for 92% of restock rows

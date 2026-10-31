@@ -10,7 +10,7 @@ from dashboard.data import load_clean_demand, load_tables, number_table, part_la
 from dashboard.part_charts import daily_stock_chart, demand_chart, part_order, part_sites, site_table
 from src.config import FORECAST_MONTHS
 from src.status import EXCESS_WEEKS
-from src.wos import WOS_MONTHS, WOS_WEEKS
+from src.weeks_of_supply import WOS_MONTHS, WOS_WEEKS
 
 PART = "SKU98"
 FIRST_PICK = "SKU75"  # the GDC's biggest shortfall, a different story from SKU98

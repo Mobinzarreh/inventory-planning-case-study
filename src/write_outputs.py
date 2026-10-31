@@ -5,7 +5,7 @@ import pandas as pd
 
 from src.clean import FLAG_COLUMNS
 from src.config import FORECAST_MONTHS, OUTPUT_DIR, ROOT
-from src.rollup import WATCH_WEEKS, add_pallet_equivalents
+from src.dc_summary import WATCH_WEEKS, add_pallet_equivalents
 
 WORKBOOK = "inventory_health_check.xlsx"
 CSV_ONLY = ["daily_stock"]  # 34,680 rows: data for the dashboard's charts, too long to be a useful sheet
@@ -19,10 +19,14 @@ PAIR_COLUMNS = [
     "supply_lines", "supply_qty", "supplier_qty", "transfer_qty", "first_eta", "restock_planned_3m",
     "restock_not_received", "run_out_date", "days_without_stock", "worst_backorder", "stock_jan31", "wos_jan31",
     "status_jan31",
-    # flags on this pair, then the data behind the numbers
-    "flags", "pair_group", "has_inventory_row", "direct_24m", "restock_out_24m", "demand_24m", "direct_elsewhere_24m",
-    "restock_in_24m", "direct_first_month",
-] + FORECAST_MONTHS
+    # flags on this pair
+    "flags",
+]
+# the data behind the numbers: in the CSV, which the dashboard and the agent read, but not on the Excel sheet,
+# where a planner reads the columns above
+DETAIL_COLUMNS = ["pair_group", "has_inventory_row", "direct_24m", "restock_out_24m", "demand_24m",
+                  "direct_elsewhere_24m", "restock_in_24m", "direct_first_month"] + FORECAST_MONTHS
+PAIR_COLUMNS = PAIR_COLUMNS + DETAIL_COLUMNS
 LEFT_OUT = ["gap_demand"]  # a working column of the run-out walk, the same as direct_first_month for 10 days
 LINE_COLUMNS = [
     "po_number", "po_line", "part_number", "destination", "source", "qty", "pallets", "eta_date", "review", "action",
@@ -90,5 +94,7 @@ def write_outputs(tables: dict[str, pd.DataFrame]) -> None:
     workbook = OUTPUT_DIR / WORKBOOK
     with pd.ExcelWriter(workbook, date_format="YYYY-MM-DD", datetime_format="YYYY-MM-DD") as writer:
         for name, table in sheets.items():
+            if name == "inventory_health":
+                table = table.drop(columns=DETAIL_COLUMNS)  # the planner's view, the CSV keeps every column
             table.to_excel(writer, sheet_name=name, index=False, freeze_panes=(1, 2))
     print(f"  wrote {workbook.relative_to(ROOT)} ({len(sheets)} sheets)")

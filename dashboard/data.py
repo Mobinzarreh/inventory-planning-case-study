@@ -14,14 +14,14 @@ NOT_IN_MASTER = "not in part master"
 
 
 def missing_tables() -> list[str]:
-    """Output tables that don't exist yet, so the app can ask for a run of run_all.py instead of crashing."""
+    """Output tables that don't exist yet, so the app can ask for a run of run_pipeline.py instead of crashing."""
     names = OUTPUT_TABLES + list(CLEAN_FILES.values())
     return [name for name in names if not (OUTPUT_DIR / f"{name}.csv").exists()]
 
 
 @st.cache_data
 def read_table(name: str, modified: float) -> pd.DataFrame:
-    """One output table. The modified time is only part of the cache key, so a fresh run_all.py shows up."""
+    """One output table. The modified time is only part of the cache key, so a fresh run_pipeline.py shows up."""
     if name == "flags":
         return pd.read_csv(OUTPUT_DIR / "flags.csv", dtype=str)  # keeps rule "4.10" from turning into 4.1
     return pd.read_csv(OUTPUT_DIR / f"{name}.csv")

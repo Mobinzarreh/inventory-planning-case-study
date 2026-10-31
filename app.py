@@ -1,7 +1,7 @@
-"""The app: the planning assistant, then the dashboard. Run from the repo root:
+"""The app: the planning agent, then the dashboard. Run from the repo root:
 .venv\\Scripts\\python.exe -m streamlit run app.py
 
-Both only read the tables in output/, so run run_all.py first. Every number on every page comes from there.
+Both only read the tables in output/, so run run_pipeline.py first. Every number on every page comes from there.
 """
 import pandas as pd
 import streamlit as st
@@ -45,27 +45,30 @@ st.set_page_config(page_title="Inventory Health Check", page_icon=":material/inv
 
 missing = missing_tables()
 if missing:
-    st.error(f"These output tables are missing: {', '.join(missing)}. Run run_all.py first.")
+    st.error(f"These output tables are missing: {', '.join(missing)}. Run run_pipeline.py first.")
     st.stop()
 
 # The agent opens first, in its own section. Then the dashboard: results for the planning manager, then how we
 # got there
-assistant = st.Page("assistant/page.py", title="Ask the agent", icon=":material/auto_awesome:", default=True)
+agent = st.Page("planning_agent/chat_page.py", title="Ask the agent", icon=":material/auto_awesome:", default=True)
+four_tasks = st.Page("dashboard/pages/four_tasks.py", title="The four tasks", icon=":material/task_alt:")
 pages = {
-    "AI planning agent": [assistant],
+    "AI planning agent": [agent],
     "Dashboard: results": [
-        st.Page("dashboard/overview.py", title="Overview", icon=":material/dashboard:"),
-        st.Page("dashboard/actions.py", title="Actions", icon=":material/checklist:"),
-        st.Page("dashboard/worked_example.py", title="Worked example: SKU98", icon=":material/search:"),
+        four_tasks,
+        st.Page("dashboard/pages/overview.py", title="Overview", icon=":material/dashboard:"),
+        st.Page("dashboard/pages/actions.py", title="Actions", icon=":material/checklist:"),
+        st.Page("dashboard/pages/worked_example.py", title="Worked example: SKU98", icon=":material/search:"),
     ],
     "Dashboard: how we got here": [
-        st.Page("dashboard/data_quality.py", title="Data quality", icon=":material/rule:"),
-        st.Page("dashboard/how_it_works.py", title="How it works", icon=":material/account_tree:"),
+        st.Page("dashboard/pages/data_quality.py", title="Data quality", icon=":material/rule:"),
+        st.Page("dashboard/pages/how_it_works.py", title="How it works", icon=":material/account_tree:"),
     ],
 }
 navigation = st.navigation(pages)
 st.html(AGENT_IN_SIDEBAR)
-if navigation.url_path != assistant.url_path:  # the filters belong to the dashboard, the agent has its own
+# the filters belong to the dashboard. The agent has its own, and the four answers cover the whole network
+if navigation.url_path not in [agent.url_path, four_tasks.url_path]:
     sidebar_filters(load_tables()["inventory_health"])
 navigation.run()
 st.sidebar.caption(f"Built by Mobin Zarreh · [Source on GitHub]({REPO_URL})")

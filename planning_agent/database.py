@@ -1,7 +1,7 @@
-"""The output tables as a read-only SQLite database in memory, for the assistant's SQL tool.
+"""The output tables as a read-only SQLite database in memory, for the agent's SQL tool.
 
 It is filled from the same loader as the dashboard (dashboard/data.py), so the two can't disagree.
-Run from the repo root to check it: .venv\\Scripts\\python.exe -m assistant.database
+Run from the repo root to check it: .venv\\Scripts\\python.exe -m planning_agent.database
 """
 import pandas as pd
 import streamlit.logger
@@ -21,7 +21,7 @@ def monthly_demand(demand: pd.DataFrame) -> pd.DataFrame:
 
 
 def database_tables() -> dict[str, pd.DataFrame]:
-    """The tables the assistant can query, by name: the dashboard's output tables, the part master and the demand.
+    """The tables the agent can query, by name: the dashboard's output tables, the part master and the demand.
 
     Reshaped only, no number is recalculated.
     """
