@@ -1,301 +1,200 @@
 # Assumptions and definitions
 
-This file records every definition, assumption and data decision in the analysis, in the order they come up in the pipeline. Each entry says what I assumed, why (what the data shows), and where it is applied in the code. The evidence for each data decision is in `notebooks/01_data_exploration.ipynb` and in the short check scripts in `exploration/`. Both read the raw files and can be rerun at any time.
+The definitions, assumptions and data decisions behind the numbers, and what I would do with more time. Each entry gives the rule, why (with the number that settled it), and where it sits in the code. The short answer to each task is on the dashboard's "The four tasks" page. Section numbers double as the `rule` IDs in `output/flags.csv`, which lists every data fix and flag (also on the Data quality page), and the `exploration/` scripts rerun the evidence.
 
 ## 1. Definitions
 
-- **Units.** All quantities are pieces (eaches), as stated in the task. Inventory, demand and supply calculations use pieces, and WOS is reported in weeks.
-  - Why: the data agrees. If a file counted pallets, parts with big pallets would look over 100 times smaller than the rest, and none do. Over 24 months, the replenishment plan sends a PDC a median 0.92 to 1.00 of that PDC's own Direct demand, in every pallet-size band from 5 or fewer pieces per pallet up to more than 100. On-hand covers a median 7.5 to 9.5 weeks of Direct demand in every band.
-  - In code: every calculation works in pieces. The check is in the notebook, "Units in each file".
-- **Pallets.** `qpc` is the number of pieces on one standard pallet. Pallets are a derived measure for inventory and capacity reporting, for example to compare warehouse space across parts of very different sizes. Pallet equivalents are worked out per part (pieces / `qpc`) and then summed. Example: 500 pieces of a part with qpc 250 is 2 pallet equivalents.
-  - In code: `add_pallet_equivalents` in `src/rollup.py` (5.4).
-- **Planned GDC shipments come in whole pallets in this data.** All 2,633 positive months in the Replenishment rows (parts with a usable `qpc`) are whole numbers of pallets, against about 17% expected by luck. No other quantity shows this. On-hand, supplier POs, in-transit GDC Transfers and Direct demand are whole pallets 11% to 14% of the time, close to luck (12% to 15%). For example, PO1051 sends 37 pieces of SKU6, which has 50 per pallet.
-  - This is a pattern in the data, not a rule stated in the task. No forecast or supply quantity is rounded or changed because of it. It is used only as supporting evidence for two cleaning questions: the two negative Replenishment months, and the three parts with a missing or zero `qpc`.
-  - Evidence: notebook, "Units in each file" (exact duplicate rows dropped before counting).
-- **Snapshot date.** On-hand inventory is as of 2026-10-22. All 309 inventory rows carry this date.
-- **Forecast horizon.** 24 monthly buckets, Nov 2026 to Oct 2028.
-- **What one row means in each file.**
-  - `parts.csv`: one part.
-  - `inventory_on_hand.csv`: one part at one location.
-  - `incoming_supply.csv`: one PO line (`po_number` + `po_line`).
-  - `demand_forecast_monthly.csv`: one part, location and demand type. Replenishment rows also carry the PDC being restocked (`ship_to`), because the GDC can have one replenishment row per PDC for the same part.
-- **Matching rows across files.** Files are matched on `part_number`, plus the location column where there is one. `part_description` is never used to match, because it is not unique: 100 parts share 75 descriptions (for example, SKU44 and SKU89 are both "Bolt M8").
+The terms used in the output, the summary and the rest of this file.
+
+| Term | Meaning |
+|---|---|
+| Pair | One part at one location. The output has 340 (4.3). |
+| Pieces | Every quantity and calculation is in pieces (eaches), as the task states. |
+| Pallet equivalents | Pieces ÷ `qpc` (pieces per standard pallet), per part, then summed. A measure of space, not counted pallet positions. 500 pieces with a `qpc` of 250 is 2. |
+| Direct demand | Customer demand served from a site. |
+| Planned restock | The Replenishment rows: the GDC's monthly plan to ship to a PDC (`ship_to`). A month and a quantity, no date. |
+| Open supply | The incoming supply lines, each with an ETA: supplier POs, and GDC transfers already on the road to a PDC. |
+| WOS | Weeks of supply: today's on-hand ÷ average weekly demand over Nov 2026 to Jan 2027 (5.2). |
+| Status | Stockout (demand, nothing on hand), Short (under 4 weeks), Healthy (4 to 26), Excess (over 26), No demand (none at that site in 24 months) (5.3). |
+| Dead stock | No demand, and the part has no demand anywhere in the network. |
+| Wanted elsewhere | No demand here, but customer demand for the part at another site. |
+| Backorder | Stock below zero: orders taken with nothing on the shelf (4.6). |
+| Run-out date | The first day the projection ends with at least one whole piece of demand unmet (5.5). |
+
+Dates: on-hand is as of 2026-10-22, the forecast runs Nov 2026 to Oct 2028 (24 months), and the supply review runs to 2027-01-31.
+
+Files join on `part_number` plus location, never on `part_description`: 100 parts share 75 names (SKU57, SKU88 and SKU98 are all Compressor). A supply line is one PO line (`po_number` + `po_line`).
+
+**Planned restock comes in whole pallets.** All 2,633 positive restock months (parts with a usable `qpc`) are whole numbers of pallets, against 11% to 14% for on-hand, POs, transfers and Direct demand. It is a pattern, not a rule, so nothing is rounded because of it, but it is evidence for 4.7, 4.9 and the restock timing in 5.5.
 
 ## 2. Reading the raw files
 
-**2.1 The files in `data/` are never edited.** All fixes happen in code, so every change can be traced and rerun.
+**2.1 The files in `data/` are never edited.** Every fix happens in code, so it can be traced and rerun.
 
-**2.2 Every column is read as text first, then converted in one place.**
-- Why: a default pandas read guesses column types without warning. For example, `on_hand_qty` loads as text because two cells use a thousands comma (`1,041` and `6,072`), and blank cells and `N/A` both turn into the same "missing" value. Reading as text keeps the raw values visible, so the profile can count each problem. The conversion then happens in one place and stops with an error on any value it does not recognize, instead of silently dropping it.
-- In code: `src/load_raw.py` (reading), `src/standardize.py` (conversion).
+**2.2 Every column is read as text, then converted in one place.** A default read guesses types without warning: `on_hand_qty` loads as text because of two thousands commas (`1,041`), and blank cells and `N/A` become the same missing value. Reading as text keeps every raw value countable, and the conversion stops with an error on any value it does not recognize. *Code: `src/load_raw.py`, `src/standardize.py`.*
 
 ## 3. Standardizing formats
 
-These steps change how a value is written, not what it means. No rows are added or removed, and the code checks that row counts are unchanged. Because the rows stay in order, every raw value can be compared with its standardized value: `standardizing_log` in `src/standardize.py` writes each file and column that changed, with the count and a few raw → standardized examples, to `output/standardizing_log.csv` (15 rows, 1,848 values fixed in this run).
+These steps change how a value is written, never what it means, and no row is added or removed. Every change is counted in `output/standardizing_log.csv` (1,848 values in 15 file and column pairs) and shown on the Data quality page.
 
-**3.1 Part numbers.** `sku16`, `SKU-53`, ` SKU24` and `SKU0022` are the same parts as `SKU16`, `SKU53`, `SKU24` and `SKU22`. Case, dashes, spaces and leading zeros are dropped.
-- Why: 14 zero-padded spellings appear, including in `parts.csv` itself (for example `SKU001`). After standardizing, the four files go from 100, 117, 67 and 119 raw spellings (parts, inventory, supply, demand) to 100, 102, 66 and 94 parts. Every part then matches a row in `parts.csv`, except SKU901 and SKU902 (inventory) and SKU903 (supply), which are handled in cleaning. Standardizing creates no new clashes: the only keys that repeat afterwards belong to rows that were already exact copies in the raw files.
-- In code: `standardize_part_number` in `src/standardize.py`.
+| | Field | Raw examples | Rule | Why |
+|---|---|---|---|---|
+| 3.1 | Part numbers | `sku16`, `SKU-53`, ` SKU24`, `SKU0022` | Drop case, dashes, spaces and leading zeros | Inventory's 117 raw spellings become 102 parts, and every part then matches `parts.csv` except SKU901 to SKU903 (4.10). No new clashes. |
+| 3.2 | Locations (`location`, `destination`, `ship_to`) | `gdc`, `Global DC`, `PDC-3`, `pdc3` | One name per site | Up to 16 raw spellings per column collapse to exactly the four sites, with nothing left over. |
+| 3.3 | Demand type | `DIRECT`, `Direct `, `Replen` | Direct or Replenishment | Matches the task: all 212 Replenishment rows are at the GDC with a PDC in `ship_to`, and no Direct row has one. |
+| 3.4 | Planner and part type | `DANIEL OKAFOR`, `glass ` | Labels that differ only in case or spaces are one label, in its most common spelling | 10 planner spellings become 5 planners, 13 part types become 10. Nothing genuinely different is merged. |
+| 3.5 | Quantities | `38.0`, `"1,041"` | Whole numbers, commas removed | No quantity has a real fraction. Blank and `N/A` stay missing until cleaning (4.8). |
+| 3.6 | Dates | `2026-11-13`, `11/15/2026`, `04-Dec-2026` | Slash dates are month/day | 7 of the 18 slash dates fit either order. As month/day they all land inside the other ETAs' range, while as day/month five would fall before the snapshot. |
 
-**3.2 Locations.** `GDC`, `gdc`, `GDC ` and `Global DC` mean the GDC. `PDC3`, `PDC-3`, `PDC 3` and `pdc3` mean PDC3, and the same goes for PDC1 and PDC2. This applies to `location`, `destination` and `ship_to`.
-- Why: the raw spellings (16 in inventory `location`, 16 in demand `location`, 12 in `ship_to` and 11 in supply `destination`) collapse to exactly the four sites the task names, with nothing left over.
-- In code: `standardize_location`.
-
-**3.3 Demand type.** `Direct`, `DIRECT`, `direct` and `Direct ` mean Direct. `Replenishment`, `REPLENISHMENT`, `replenishment ` and `Replen` mean Replenishment.
-- Why: the result matches the task's definition exactly. All 212 Replenishment rows sit at the GDC with a PDC in `ship_to`, and none of the 304 Direct rows has a `ship_to`. The 6 rows spelled `Replen` follow the same pattern (all at the GDC, each with a PDC in `ship_to`).
-- In code: `standardize_demand_type`.
-
-**3.4 Planner and part type.** Labels that differ only in case or spaces are the same, for example `DANIEL OKAFOR` and `Daniel Okafor`, or `glass ` and `Glass`. Each label takes its most common spelling, so `HVAC` stays `HVAC`.
-- Why: 10 planner spellings become 5 planners, and 13 part type spellings become 10 part types. No two genuinely different names are merged.
-- In code: `standardize_label`.
-
-**3.5 Quantity text.** `38.0` is 38, and `1,041` is 1041.
-- Why: no quantity in any file has a real fractional part, so dropping `.0` loses nothing. Blank and `N/A` forecast cells are kept as missing at this stage. Whether a missing month counts as zero is a cleaning decision (section 4).
-- In code: `parse_quantity`.
-
-**3.6 Dates.** ETAs come in three layouts: `2026-11-13`, `11/15/2026` and `04-Dec-2026`. Slash dates are read as month/day/year (US order).
-- Why: 18 ETAs use slashes, and 7 of them could be read either way (for example `11/05/2026`). Read as month/day, all 7 land between 2026-11-02 and 2027-01-10, inside the range of every other ETA (2026-10-25 to 2027-01-12). Read as day/month, five would fall between Feb and Jun 2026, months before the snapshot, which makes no sense for open supply, and the other two (`01/10/2027`) would jump to Oct 2027.
-- In code: `parse_date`.
+*Code: `src/standardize.py` (`standardize_part_number`, `standardize_location`, `standardize_demand_type`, `standardize_label`, `parse_quantity`, `parse_date`).*
 
 ## 4. Cleaning decisions
 
-Nothing is dropped or changed silently. Every row that is set aside, changed or looks odd gets a flag that says what was found and what it might mean, for example a data entry error, or a new part not yet set up in the part master. The flags are kept in a list next to the main output, so a planner can check them. The list is built by `clean_all` in `src/clean.py` (93 rows after rules 4.4 to 4.10). With the flags from 4.3, 5.3 and 5.5 added, the full list has 139 rows. `run_all.py` writes it to `output/flags.csv` and to the `flags` sheet of the workbook, and the `flags` column of the main output lists the issues on each part and location. The clean tables are written to `output/clean/` under the raw file names (`save_clean_tables`), so each one can be opened and checked.
+Nothing is dropped or changed silently: every row set aside, changed or odd gets a flag saying what was found and what it might mean, such as "possible double entry, check with the buyer". The 139 flags, with their full text, are in `output/flags.csv`, the workbook's `flags` sheet and the Data quality page. The cleaned files are in `output/clean/`. *Code: `clean_all` in `src/clean.py`.*
 
-**4.1 A part at a location with no inventory row has 0 on hand.**
-- Why: the inventory file has no blank on-hand cells, so a missing row is the only way stock goes unrecorded, and there is no other number to use. 0 is also the cautious reading, because it flags the pair instead of hiding it. The GDC's restock plan agrees: 33 PDC pairs have real demand but no inventory row, and all 33 have a restock row. 25 of them get a November 2026 restock at least as big as November demand, and the other 8 already have supply on the way. For example, PDC2 has no SKU26 row, forecasts 845 pieces in November, and the GDC plans to send it 2,000 that month.
-- Count: 41 pairs have a demand row but no inventory row. 35 of them have real demand (see 4.2).
-- In code: `fill_missing_sources` in `src/master.py` (column `has_inventory_row` shows which pairs had no row). Evidence: `exploration/04_inventory_vs_demand.py` and `exploration/05_supply_vs_pairs.py`.
+**4.1 A part at a location with no inventory row has 0 on hand.** 41 pairs have a demand row but no inventory row, 35 of them with real demand. The inventory file has no blank cells, so a missing row is the only way stock goes unrecorded, and 0 shows the pair instead of hiding it. The restock plan agrees: all 33 such PDC pairs have a restock row. *Code: `fill_missing_sources` in `src/master_table.py` (column `has_inventory_row`). Evidence: `exploration/04`, `05`.*
 
-**4.2 A demand row that is zero in all 24 months counts as no demand, the same as having no row.**
-- Why: 12 Direct rows are zero for all 24 months (9 at PDCs, 3 at the GDC). The plan treats them like missing rows, since the GDC plans no restock for any of the 9 PDC ones (5.1). No forecast starts late either: every part and location with demand in the 24 months has some in the first 3 months, so an all-zero row is not hiding demand that shows up later. Example: SKU36 at PDC2 has 220 pieces and an all-zero row, and SKU16 at PDC2 has 210 pieces and no row. Both are stock with no demand.
-- SKU59 at PDC1 has one blank month and zeros in the other 23. The blank-month rule (4.8) fills it with 0, so the row stays all zero.
-- In code: `label_pairs` in `src/master.py` (a pair has demand only if `demand_24m` is above 0). Evidence: `exploration/02_gdc_pdc_chain.py` and `exploration/04_inventory_vs_demand.py`.
+**4.2 A demand row of zeros in all 24 months counts as no demand.** 12 Direct rows are all zero, and the GDC plans no restock for any of the 9 at PDCs, so the plan treats them like missing rows. No forecast starts late either: every pair with demand has some in the first 3 months. *Code: `label_pairs` in `src/master_table.py`. Evidence: `exploration/02`, `04`.*
 
-**4.3 The output covers every part and location that has an inventory row, real demand or incoming supply.** That is 340 pairs: 304 with an inventory row (after exact duplicates are dropped), 35 with real demand but no inventory row, and 1 with only incoming supply.
-- Why: a pair with any of the three is something a planner can act on, and supply matters on its own. SKU903 is not in `parts.csv` and has no inventory or demand anywhere, yet a supplier PO is heading to PDC1 (PO9999, 60 pieces, the only PO number outside PO1001 to PO1054). It stays in the output with a flag. It could be a new part not yet added to the master, a mistyped part number, or a test or placeholder record. Either way a planner should check it before it lands on 2026-11-20.
-- Set aside, with a flag: 6 pairs whose only record is an all-zero demand row (SKU36 at PDC1, SKU40 at PDC2, SKU59 at PDC1, SKU78 at PDC2, SKU96 at PDC1 and PDC3). None has incoming supply, so in the main output they would only show 0 stock, 0 demand and nothing coming. They go in the flag list instead (possibly forecast rows left over for parts these sites no longer carry).
-- In code: `label_pairs` and `set_aside_empty_pairs` in `src/master.py`. The master table has 340 rows (265 with inventory and demand, 35 with demand but no inventory row, 39 with inventory but no demand, 1 with supply only), and the 6 set-aside pairs are in the flag list. Evidence: `exploration/05_supply_vs_pairs.py`.
+**4.3 The output covers every pair with an inventory row, real demand or incoming supply: 340 pairs.** 304 have an inventory row, 35 have demand but no row, and 1 has only supply (SKU903 at PDC1, 4.10). A planner can act on any of them. The 6 pairs whose only record is an all-zero demand row are set aside and flagged (possibly a forecast row left over for a part the site no longer carries). *Code: `label_pairs` and `set_aside_empty_pairs` in `src/master_table.py`. Evidence: `exploration/05`.*
 
-**4.4 Exact duplicate rows: keep one copy and flag the dropped one.** Flag: "exact duplicate, likely exported twice".
-- Found: 12 rows are full copies of another row. 1 in `parts.csv` (SKU6), 5 in inventory (SKU1 at PDC2, SKU28 at PDC2, SKU50 at PDC3, SKU68 at PDC2, SKU79 at the GDC), 4 in supply (PO1006 line 10, PO1011 line 10, PO1012 line 20, PO1044 line 10) and 2 in demand (the Direct rows for SKU69 at PDC3 and SKU73 at the GDC). They were already identical in the raw text, before any standardizing.
-- Why: once the copies are dropped, no key repeats in any file. No part is listed twice with different details, no part and location has two different on-hand counts, and no PO line appears twice with different quantities. So each copy is the same record twice, and keeping both would count it twice. For example, PO1011 line 10 (4,432 pieces of SKU43 in transit to PDC3) would count as 8,864.
-- Result: 100 parts, 304 inventory rows, 109 supply lines and 514 demand rows.
-- In code: `drop_exact_copies` in `src/clean.py`. Evidence: `exploration/06_cleaning_evidence.py`, section 1.
+**4.4 Exact duplicate rows: one copy is kept.** 12 rows across the four files are full copies of another row. Once they are dropped no key repeats anywhere, so each copy is the same record twice: keeping both would bring PO1011 line 10 in as 8,864 pieces of SKU43 instead of 4,432. *Code: `drop_exact_copies` in `src/clean.py`. Evidence: `exploration/06`, section 1.*
 
-**4.5 Supply lines that look alike are all kept, because they are separate PO lines. Each pair is flagged.** Flag: "possible double entry, check with the buyer".
-- Found: 11 pairs of supply lines (22 lines) send the same part, in the same quantity, to the same site, on different PO lines and dates. 6 pairs are two supplier POs (SKU3 to PDC1, SKU4 to PDC3, and SKU27, SKU43, SKU50 and SKU51 to the GDC). 4 pairs are a GDC Transfer plus a supplier PO (SKU15, SKU17 and SKU72 to PDC2, SKU89 to PDC3). 1 pair is two GDC Transfers (SKU96 to PDC2). The two lines in a pair land between 2 days and 2 months apart. For example, the GDC gets 1,136 pieces of SKU43 on 2026-11-23 (PO1050) and another 1,136 on 2027-01-04 (PO1006).
-- Why: each line has its own PO number and line, which is what identifies a supply line, so the files say these are separate orders. Ordering the same lot size again is common, and nothing in the data proves that any pair is one shipment entered twice. If one is, that part's incoming supply is overstated, which is why each pair is flagged for the buyer to check.
-- In code: `flag_look_alike_supply` in `src/clean.py`. Evidence: `exploration/06_cleaning_evidence.py`, section 1.
+**4.5 Supply lines that look alike are all kept, and flagged.** 11 pairs of lines send the same part and quantity to the same site on different PO lines and dates (1,136 pieces of SKU43 to the GDC on PO1050 and again on PO1006). Each has its own PO number and line, and ordering the same lot size again is common, so nothing proves a double entry. If one is, that part's supply is overstated. *Code: `flag_look_alike_supply` in `src/clean.py`. Evidence: `exploration/06`, section 1.*
 
-**4.6 Negative on-hand is kept as a backorder.** The negative number stays. Today's WOS for these rows is 0 and their status is Stockout (section 5 sets the status labels). When supply lands, it fills the backorder first, so stock after supply is the negative number plus the incoming pieces. Flag: "likely backorder, or a booking or count error".
-- Found: 4 rows. SKU46 at the GDC (-11), SKU92 at PDC2 (-18), SKU75 at PDC1 (-15) and SKU52 at PDC1 (-4).
-- Why: a shelf cannot hold fewer than zero pieces, so a negative count most likely means customer orders taken while the shelf was empty, which is a backorder. All four have real demand, which fits that reading, and the numbers are small next to demand (SKU75 at PDC1 is -15 against about 909 pieces a month). Resetting them to 0 would hide pieces that are already owed. Example: SKU92 at PDC2 has 49 pieces arriving on 2027-01-03, the only one of the four with supply coming. Counted from 0, that looks like 49 pieces of cover. Counted from -18, only 31 are free once the waiting orders are filled.
-- In code: `flag_negative_on_hand` in `src/clean.py`. WOS 0 is set by `add_wos` in `src/wos.py` (5.2), and Stockout by `label_status` in `src/status.py` (5.3). Evidence: `exploration/06_cleaning_evidence.py`, section 2a.
+**4.6 Negative on-hand is kept as a backorder.** 4 rows, from −4 to −18, all with real demand: most likely orders taken while the shelf was empty. Resetting to 0 would hide pieces already owed: SKU92 at PDC2 has 49 pieces coming, but only 31 are free once its 18 waiting orders are filled. WOS is 0, status is Stockout, and incoming supply fills the backorder first. *Code: `flag_negative_on_hand` in `src/clean.py`. Evidence: `exploration/06`, section 2a.*
 
-**4.7 A negative forecast month is treated as a blank and filled the same way (4.8).** Flag: "negative forecast: possible sign error, returns netted in, or typo", with the value used.
-- Found: 6 cells, all in Mar 2027 or later. Direct: SKU1 at the GDC in 2027-03 (-5), SKU60 at PDC3 in 2027-06 (-2), SKU37 at PDC3 in 2028-04 (-7) and SKU30 at PDC2 in 2028-05 (-5). Replenishment: SKU2 to PDC3 in 2027-05 (-6) and SKU98 to PDC2 in 2027-07 (-12).
-- Why: neither customer demand nor a planned shipment can be below zero, so these are not valid values. The two restock ones are clearly not real shipments. Every other restock month is a whole number of pallets (section 1), but -6 is not a multiple of SKU2's 250-piece pallet, and -12 is not a multiple of SKU98's 8. Setting them to 0 would understate a month like SKU98's, which sits between 704 and 824. Flipping the sign fits some (SKU30's -5 sits between 4 and 5) but not others (SKU37's -7 sits between 2 and 1). Filling from the neighbouring months works for all six.
-- Result: 10.5 (SKU1), 4.5 (SKU60), 1.5 (SKU37), 4.5 (SKU30), 250 (SKU2, exactly one pallet) and 764 (SKU98).
-- In code: `fill_forecast_gaps` in `src/clean.py`. Evidence: `exploration/06_cleaning_evidence.py`, sections 2b and 6.
+**4.7 A negative forecast month is treated as a blank and filled as in 4.8.** 6 cells, all in Mar 2027 or later. Neither demand nor a planned shipment can be negative. Zero would understate months like SKU98's restock, which runs 704 to 824 around its −12, and flipping the sign fits some cells but not others. The average of the neighbouring months fits all six. *Code: `fill_forecast_gaps` in `src/clean.py`. Evidence: `exploration/06`, sections 2b and 6.*
 
-**4.8 A blank forecast month is filled with the average of the month before and the month after.** A blank in the last month (2028-10) has no month after it, so it takes the month before. Each filled cell is flagged with the value used. Filled values are not rounded to whole pallets (section 1).
-- Found: 42 blank cells (empty or `N/A`) in 39 rows, 27 in Direct rows and 15 in restock rows. None falls in Nov 2026 to Jan 2027. Together with the 6 negative months (4.7), 48 cells are filled. No two of them sit next to each other, so each fill uses real months, and only 2 (both in 2028-10) have just one neighbour.
-- Why: a blank means the forecast is unknown, not zero. Filling with 0 would understate months like SKU44 at the GDC in 2028-01, which sits between 561 and 452. The months on either side are the best guide to the level at that point. The choice barely moves any total: the 48 fills add 3,702.5 pieces, 0.5% of all forecast pieces (2,667.5 of them in the 42 blanks). 6 blanks have a 0 on both sides and are filled with 0.
-- Restock rows come in whole pallets and a filled value may not. For example, SKU75 to PDC1 in 2027-04 sits between 0 and 1,250 and becomes 625. It is left as is, since forecasts are never rounded.
-- WOS (5.2) averages Nov 2026 to Jan 2027, which has no filled cells. A 6-month window would have included 8, in Feb to Apr 2027 (7 blanks and SKU1's negative month).
-- In code: `fill_forecast_gaps` in `src/clean.py`. Evidence: `exploration/06_cleaning_evidence.py`, sections 3 and 6.
+**4.8 A blank forecast month gets the average of the month before and the month after** (the last month takes the month before). 42 cells are blank or `N/A`. A blank means unknown, not zero: SKU44 at the GDC in 2028-01 sits between 561 and 452. With 4.7, the 48 fills add 0.5% to all forecast pieces, and none falls in Nov to Jan, the WOS window. Filled restock months are not rounded to pallets. *Code: `fill_forecast_gaps` in `src/clean.py`. Evidence: `exploration/06`, sections 3 and 6.*
 
-**4.9 A missing or zero `qpc` is estimated from the restock pallet pattern, marked "estimated" in the output, and flagged.** Flag: "qpc missing or zero in the part master, estimated from the restock pallet pattern, confirm with the part master owner". SKU57 gets 6, SKU34 gets 6 and SKU5 gets 4.
-- Why: restock months always come in whole pallets (section 1), so the largest number that divides every restock month of a part should be its `qpc`. Tested on the 85 parts that have a known `qpc` and restock rows, this gives exactly the right `qpc` for 84. The exception is SKU3 (`qpc` 100), whose restock months are all multiples of 200, because it always ships two pallets at a time. In all 85 the result is the `qpc` or a multiple of it.
-  - SKU57 (Compressor, blank `qpc`): restock months of 6 and 12 give 6. Another compressor, SKU88, has a `qpc` of 6, and 6 is the most common HVAC value (5 parts). Strong.
-  - SKU34 (Rear Glass, blank `qpc`): restock months of 6, 12, 18 and 24 give 6. The other rear glass parts have 4 (SKU11) and 10 (SKU45), but neither can be right, because a 6-piece shipment would then not be a whole pallet. Medium.
-  - SKU5 (Compressor Gen2, `qpc` 0): restock months of 4, 8 and 12 give 4. No other HVAC part uses 4 (they use 6 or 8). Medium.
-- `qpc` only turns pieces into pallets. It never affects WOS or status.
-- In code: `estimate_missing_qpc` in `src/clean.py`. It runs before 4.7 and 4.8, so filled months never feed the pallet pattern. Evidence: `exploration/06_cleaning_evidence.py`, section 4.
+**4.9 A missing or zero `qpc` is estimated from the restock pallet pattern.** SKU57 and SKU34 have no `qpc` and SKU5 has 0. Since restock comes in whole pallets (section 1), the largest number that divides every restock month of a part should be its `qpc`, and it gives the right value for 84 of the 85 parts with a known one. So SKU57 gets 6, SKU34 6 and SKU5 4, marked "estimated" in the output. `qpc` only turns pieces into pallets, so WOS and status never depend on it. *Code: `estimate_missing_qpc` in `src/clean.py`, run before 4.7 and 4.8 so filled months never feed it. Evidence: `exploration/06`, section 4.*
 
-**4.10 Parts not in the part master are kept and flagged for investigation.** Parts appearing in inventory or supply but absent from the part master are retained and flagged for investigation. Their recorded quantities remain in piece totals. Packaging and ownership attributes (`qpc`, description, part type and planner) remain unknown, so these parts are left out of pallet totals, and that is said wherever pallets are reported. Missing forecasts do not establish that these parts are obsolete, so they are not counted as dead stock.
-- Found: 3 codes. SKU901 (35 pieces on hand at PDC2), SKU902 (120 on hand at the GDC) and SKU903 (60 pieces arriving at PDC1 on 2026-11-20 on PO9999). None has a demand row.
-- Why kept: the pieces are on the shelf or on the way, so dropping them would understate stock and supply.
-- Why not mapped to a known part: the part master is exactly SKU1 to SKU100 with no gaps, and the 47 other odd spellings in the raw files (50 rows) each match one known part by format alone (3.1). These three do not. They could be typos, and two stories fit. One is a padded code with a 9 typed instead of the 0 next to it (`SKU001` becomes `SKU901`), pointing to SKU1, SKU2 and SKU3. Padded codes like `SKU001` and `SKU005` do appear in the data. The other is an extra 0, pointing to SKU91, SKU92 and SKU93. The restock plan can test some of these, because the GDC plans a PDC's first restock for the month that PDC runs out. For the 212 known restock rows that rule is within 1 month 198 times and never more than 3 months off. Adding SKU901's 35 pieces to SKU91 at PDC2 would put the predicted month 5 months away from the plan, and adding SKU903's 60 to SKU93 at PDC1 would put it 8 months away, so those two are unlikely. SKU1 and SKU3 fit equally well with or without the extra pieces, so the test cannot confirm them, and SKU902 at the GDC cannot be tested at all. The evidence narrows the guesses but proves none of them, so no stock is moved.
-- Flag on each: "not in the part master: possibly a new part not yet set up, a mistyped part number, or a test record", with the best guess and the ruled-out candidates. SKU903's flag also notes that PO9999 is the only PO number outside PO1001 to PO1054.
-- Where the guess would matter: SKU1 at PDC2 has 17 pieces, a WOS of 5.1 weeks (5.2). If SKU901 is SKU1, it has 52, about 15.5 weeks, which could change its status. With the status lines in 5.3 it stays Healthy either way, and its flag says so. For the others the effect is small: 120 pieces is about 2% of SKU2's stock at the GDC, and 60 more pieces of SKU3 at PDC1 add under 2 weeks of supply after arrivals.
-- In code: `flag_unknown_parts` in `src/clean.py`. Evidence: `exploration/06_cleaning_evidence.py`, section 5, and `exploration/07_unknown_part_numbers.py`.
+**4.10 Parts not in the part master are kept and flagged, not mapped to a known part, and not called dead stock.** SKU901 has 35 pieces at PDC2, SKU902 has 120 at the GDC, and SKU903 has 60 arriving at PDC1 on PO9999 (the only PO number outside PO1001 to PO1054). The pieces are real, so they stay in piece totals. With no `qpc` they are left out of pallet totals, and every pallet figure says so. Every other odd spelling resolves by format (3.1), and a typo test against the restock plan rules out SKU91 and SKU93 and can't confirm the rest, so no stock is moved to a guess. A missing forecast doesn't prove a part obsolete, so they are not dead stock. Each is flagged as a possible new part, typo or test record, with the best guess. SKU1 at PDC2 is flagged too, because SKU901 could be SKU1 (17 pieces would become 52, still Healthy). *Code: `flag_unknown_parts` in `src/clean.py`. Evidence: `exploration/06` section 5, `exploration/07`.*
 
 ## 5. Method
 
-**5.1 Which demand counts at each site.** A PDC's demand is its own Direct row. The GDC's demand is its own Direct row plus all its Replenishment rows, because both are pieces leaving the GDC shelf (to customers, or to a PDC). PDC Direct demand is never added to the GDC as well. A GDC Transfer counts as incoming supply at the PDC it is heading to, never at the GDC.
-- Why:
-  - The restock plan follows PDC demand one for one. All 212 Replenishment rows match a Direct row for the same part at the PDC in `ship_to`. The other way round, 9 PDC Direct rows have no restock row, and all 9 forecast zero for the full 24 months (SKU59 at PDC1 also has one missing month).
-  - The restock plan already takes each PDC's own stock into account. Comparing running totals month by month, restock alone keeps up with the PDC's Direct demand in a median 40% of months. Add the PDC's on-hand and the median pair keeps up in every month, and 140 of the 212 pairs never fall behind. For example, SKU82 at PDC2 has 44 pieces on hand and sells 2 to 7 a month. Those 44 cover demand through Sep 2027 (42 pieces), and the first planned restock is 6 pieces in Oct 2027. Adding PDC demand to the GDC would count the same pieces twice, and would also ignore the stock the PDC already holds.
-  - The task says a GDC Transfer has already left the GDC. In the data, all 43 transfer lines go to a PDC, and 40 of them match a restock row for the same part and PDC.
-  - In round numbers: PDC1 sells 100 a month, and the GDC sells 50 a month to its own customers and plans to ship PDC1 80 a month. The GDC needs 50 + 80 = 130 a month, not 50 + 100 + 80 = 230.
-- Side effect: restock months come in whole pallets and are often zero (section 1), so GDC demand is lumpy from month to month. The averaging window for WOS has to handle that (next entry).
-- Not covered by this rule: 3 transfers have no restock row. SKU96 (PO1004 and PO1006, 65 pieces each) and SKU17 (PO1052, 92 pieces) are heading to PDC2, which has no demand for either part. They are picked up in the supply review.
-- Evidence: `exploration/02_gdc_pdc_chain.py` and `exploration/03_restock_and_on_hand.py`. Exact duplicate rows are dropped first. For the running totals only, a missing month, a missing inventory row and negative on-hand all count as 0.
-- In code: `demand_by_pair`, `restock_in_by_pair` and `supply_by_pair` in `src/master.py`. In the master table, `demand_24m` and the 24 month columns are each site's demand under this rule, `restock_in_24m` is what the GDC plans to send a PDC, and GDC Transfers sit in `transfer_qty` at the PDC. Example: SKU82's GDC demand is 303 over 24 months, its own 97 plus the 206 it plans to send to PDC1 (86), PDC2 (72) and PDC3 (48).
+**5.1 Which demand counts at each site.** A PDC's demand is its own Direct row. The GDC's demand is its own Direct row plus all its Replenishment rows, because both leave its shelf, to customers or to a PDC. PDC Direct demand is never added to the GDC as well, and a GDC transfer is incoming supply at the PDC it is heading to, never at the GDC (the task says it has already left).
+- Why: the restock plan already turns PDC demand into GDC shipments. All 212 Replenishment rows match a Direct row for the same part at the PDC in `ship_to`, and the plan allows for each PDC's own stock: restock alone keeps up with PDC demand in a median 40% of months, but restock plus the PDC's on-hand keeps up in every month for 140 of the 212. Adding PDC demand to the GDC would count the same pieces twice.
+- In round numbers: PDC1 sells 100 a month, and the GDC sells 50 to its own customers and plans to ship PDC1 80. The GDC needs 50 + 80 = 130 a month, not 50 + 100 + 80 = 230.
+- Side effect: restock months are whole pallets and often zero, so GDC demand is lumpy from month to month (handled in 5.2).
 
-**5.2 Weeks of supply (WOS) for today's stock.** WOS = on-hand ÷ average weekly demand over the next 3 forecast months (Nov 2026 to Jan 2027). Weekly demand = (Nov + Dec + Jan demand) ÷ 13.14 weeks, which is 92 calendar days ÷ 7. Demand is each site's demand under 5.1, so the GDC's includes its planned shipments to the PDCs, and months with no planned shipment stay in as zeros. WOS counts from the snapshot date, 2026-10-22. No forecast covers the 10 days before November, so the Nov to Jan rate stands in for them too, and those days are not free coverage. Where the forecast is walked forward day by day or month by month instead (the run-out time below, the timing flag in 5.3 and the projection in 5.5), those 10 days use each site's own customer demand at November's rate. The GDC's planned shipments to the PDCs are left out of them, because the restock plan starts in November and the data does not show what moves in late October (5.5). On-hand of 0 or less gives WOS 0 (4.6). A pair with no demand gets no WOS (blank), and the status step labels it.
-- Example: SKU6 at the GDC has 76 pieces and needs 115 + 21 + 16 = 152 in Nov to Jan. That is 152 ÷ 13.14 = 11.6 a week, so WOS = 76 ÷ 11.6 = 6.6 weeks.
+*Code: `demand_by_pair`, `restock_in_by_pair` and `supply_by_pair` in `src/master_table.py`. Evidence: `exploration/02`, `03`.*
+
+**5.2 Weeks of supply (WOS) for today's stock.** WOS = on-hand ÷ average weekly demand over Nov 2026 to Jan 2027, where weekly demand = (Nov + Dec + Jan) ÷ 13.14 (the window's 92 days ÷ 7). Demand follows 5.1, and months with no planned restock count as zeros. On-hand of 0 or less gives WOS 0 (4.6), and a pair with no demand gets no WOS.
+- Example: SKU6 at the GDC has 76 pieces and needs 115 + 21 + 16 = 152 in Nov to Jan, so 11.6 a week and a WOS of 6.6 weeks.
 - Why the next 3 months:
-  - It is the demand today's stock will actually meet. Walking the forecast forward from the snapshot, in whole pieces as in 5.5, 174 of the 253 pairs with stock run out within 13 weeks, and the median pair runs out in 6.4 weeks (PDC3) to 10.2 weeks (GDC).
-  - It matches that run-out time better than longer windows. The 3-month WOS is within 2 weeks or 20% of it for 219 of 253 pairs, against 214 for 6 months, 211 for 12 and 196 for 24. The difference is largest at the GDC (80% against 60% to 73%).
-  - It uses only real forecast numbers. None of the 48 filled cells (4.7, 4.8) falls in Nov to Jan, against 8 in a 6-month window, 21 in 12 months and 48 in 24.
-  - All 300 pairs with demand have some in Nov to Jan, so no pair with demand divides by zero.
-  - Demand has no strong trend that would distort a near-term rate. Every 3-month block over the 24 months is within 0.90 to 1.15 of Nov to Jan, at every site.
-  - All incoming supply lands between 2026-10-25 and 2027-01-12, inside the same window, so the supply review can work in the same weeks.
-- Why calendar days: the window is fixed, so its length is known exactly. 52 weeks ÷ 12 months would give 13.0 weeks and make every WOS 1.1% lower. 4 weeks a month would make every WOS about 9% too low.
-- Why start at the snapshot: WOS describes the stock on 2026-10-22, so a WOS of 2 weeks means the shelf is empty around 5 Nov. The 10-day gap matters most for the tightest pairs: 29 of the 253 pairs with stock would run out within those 10 days at November's customer rate. 13 of the 109 supply lines also land in the gap.
-- Lumpy GDC months: 45.8% of restock cells are zero (55.2% in Nov to Jan, where 68 of the 212 restock rows plan nothing). Averaging only the non-zero months would overstate demand, so the zeros stay in. Combining the GDC's Direct row with all its restock rows first (5.1) smooths most of this, and only 2.4% of combined GDC months are zero. GDC months still swing more than PDC months: a typical month is 47% away from the pair's average month, against 29% to 30% at the PDCs.
-- Known limit: one average rate can hide timing. SKU6 at the GDC has a WOS of 6.6 weeks, but November alone needs 115 (15 for customers plus one 50-piece pallet each to PDC2 and PDC3), so its 76 pieces run out on 2026-11-19, 4.1 weeks after the snapshot. (In the supply review the two pallets leave together on 2026-11-01, so SKU6 runs out there that day, 5.5.) SKU61 at the GDC goes the other way. Its 3 pieces give a WOS of 39.4 weeks, but they run out on 2027-03-03 (18.9 weeks), when 22 are needed in March. 34 of the 253 pairs with stock are more than 2 weeks and 20% away from their run-out time. The dated projection in the supply review (5.5) shows these cases. Comparing the 3-month and 6-month rates was tested as a warning flag instead, but it caught only 15 of the 34 and raised 23 false alarms, so it is not used.
-- Result: 300 pairs get a WOS, 47 of them 0 (no stock). The other 40 pairs have no demand and are left blank. Median WOS for pairs with demand: GDC 8.7, PDC1 2.6, PDC2 6.2 and PDC3 5.3 weeks.
-- In code: `add_wos` in `src/wos.py` (columns `demand_3m`, `weekly_demand`, `gap_demand` and `wos`). `gap_demand` comes from `direct_first_month`, each site's own November customer demand, built in `demand_by_pair` in `src/master.py`. Evidence: `exploration/08_wos_evidence.py`.
+  - It is the demand today's stock will actually meet. Walking the forecast forward, the median pair with stock runs out in 6.4 to 10.2 weeks, depending on the site.
+  - It matches that run-out time best: within 2 weeks or 20% for 219 of 253 pairs, against 214 for a 6-month window, 211 for 12 months and 196 for 24.
+  - It uses only real forecast numbers (none of the 48 filled cells), demand has no strong trend (every 3-month block is within 0.90 to 1.15 of it), and all open supply lands inside it.
+- WOS counts from the snapshot, Oct 22: the 10 days before November have no forecast, so they count at the Nov to Jan rate, not as free cover.
+- Known limit: one average rate can hide timing. SKU6's 6.6 weeks run out after 4.1, because November alone needs 115. 34 of the 253 pairs with stock are off by more than 2 weeks and 20%, and the dated projection (5.5) shows them.
 
-**5.3 Inventory status.** Every part and location gets one of five statuses from its WOS (5.2). The same lines apply at all four sites. The lines are our choice, and the evidence below is why we chose them.
-- **Stockout:** demand, but WOS 0 (on-hand 0 or below, or no inventory row).
-- **Short:** WOS above 0 and under 4 weeks.
-- **Healthy:** WOS from 4 to 26 weeks.
-- **Excess:** WOS over 26 weeks.
-- **No demand:** no demand at this site in any of the 24 months, so no WOS. A second column, `no_demand_reason`, says why: dead stock (no demand anywhere in the network), wanted at another site (customer demand for the same part elsewhere), or not in the part master (4.10, never called dead stock).
-- Why 4 weeks for Short: it is about one month, and most sites are restocked monthly. 112 of the 212 restock rows plan a shipment every month and 46 every 2 months, so a site with less than a month of stock is likely to run out before the next delivery. It is also where WOS agrees best with the month-by-month run-out time (5.2): no pair with a WOS of 4 or more runs out within 4 weeks, and 4 pairs go the other way.
-- Why 26 weeks for Excess:
-  - Normal restock deliveries should not be called Excess. A typical planned PDC delivery covers a median 6.4 to 6.7 weeks of that PDC's demand, but whole pallets make some much larger: 39 of the 212 restock rows deliver more than 13 weeks of demand at once, and 16 more than 26 weeks. A 13-week line could call stock Excess right after a normal delivery.
-  - Replenishment takes time. Open supply, including GDC transfers already on the road, lands 0.4 to 11.7 weeks after the snapshot, spread fairly evenly. The data has no order dates, so true lead times are unknown. But every one of these orders was placed before the snapshot, so the slowest take at least 11.7 weeks from order to arrival. A site waiting on such an order needs around 12 weeks of stock just to bridge the wait.
-  - A higher line would leave a lot out of the review. At 26 weeks, 55 pairs are Excess, with 18,675 pieces (1,168 pallets) above the line. At 39 weeks it would be 37 pairs and 618 pallets, and at 52 weeks 23 pairs and 232 pallets.
-  - Watch list: 23 pairs sit between 13 and 26 weeks (12 at the GDC, 11 at the PDCs). Only 1 of the 11 PDC ones (SKU10 at PDC2) is explained by one big delivery, so they stay Healthy but are shown as a watch group in the DC summary.
-- Why the same lines everywhere: open supply lands over the same span at the GDC and at the PDCs (supplier POs and GDC transfers both land up to about 12 weeks out), so the data gives no sign that one site waits longer than another. A lower Excess line at the PDCs would also catch normal pallet-sized deliveries.
-- Timing flag: status comes from WOS alone. A pair with a WOS of 4 weeks or more that still runs out within 4 weeks, when the forecast is walked month by month, keeps its WOS status and gets the flag "runs out sooner than WOS suggests" with the run-out date. No pair gets it in this data. The closest is SKU80 at PDC2 (WOS 7.9): its 9 pieces last to 2026-11-20 (4.2 weeks), just past the line, and in the supply review (5.5) it never runs out. Counted in fractions of a piece it ran out on 2026-11-18 (3.9 weeks) and was flagged; whole pieces (5.5) move it two days. Three GDC pairs also sit just past the line. SKU6 and SKU45 run out on 2026-11-19 and 2026-11-20 (4.1 and 4.2 weeks) at the month-by-month pace. The walk spreads the GDC's restock over the month, but in the supply review it leaves on the 1st, so both run out there on 2026-11-01, and both are GDC shortfalls. SKU35 runs out on 2026-11-23 (4.7 weeks) on today's stock, but 101 pieces land on 2026-11-06.
-- Result (340 pairs): Stockout 47, Short 83, Healthy 115, Excess 55, No demand 40. By site (Stockout / Short / Healthy / Excess / No demand): GDC 5 / 22 / 41 / 20 / 9, PDC1 17 / 21 / 19 / 13 / 12, PDC2 12 / 24 / 25 / 17 / 11, PDC3 13 / 16 / 30 / 5 / 8. No demand splits into 25 dead stock pairs (12 parts, 5,186 pieces, 473 pallets, with 646 more pieces still on the way), 12 pairs wanted at another site (1,536 pieces, 185 pallets) and 3 pairs not in the part master (155 pieces, 60 on the way).
-- Not used: different lines per site, and turning the timing cases into Short (both above).
-- In code: `label_status`, `label_no_demand_reason` and `flag_early_run_out` in `src/status.py`, and `weeks_until_run_out` in `src/wos.py`. Evidence: `exploration/09_status_evidence.py`.
+*Code: `add_wos` in `src/weeks_of_supply.py`. Evidence: `exploration/08`.*
 
-**5.4 DC-level summary.** One row per DC, plus an all-sites row, in three parts, led by the status mix:
-1. **Status mix:** pairs in each status (5.3), as counts and as shares of all pairs at that DC, No demand included. Each part and location counts once.
-2. **Space, in pallet equivalents** (pieces ÷ `qpc` per part, then summed, section 1): pallet equivalents on hand, pallet equivalents above the 26-week line, dead stock, and stock wanted at another site. Above the line counts Excess pairs only (stock minus 26 weeks of demand), and No demand stock is reported on its own, so nothing is counted twice. Example: a part holding 10 pallet equivalents, when 26 weeks of its demand is 6, adds 4 above the line. Parts not in the part master have no `qpc`, so they are shown in pieces only (4.10).
-3. **Action counts that overlap the statuses** and are never added to them: the watch list (Healthy pairs with WOS over 13 weeks, 5.3) and the timing flags (5.3).
-- Why no single WOS number: five ways of squashing a DC's WOS into one number disagree widely. PDC1 comes out at 11.0 weeks (simple average), 2.6 (median), 4.4 (total stock ÷ total weekly demand, in pieces), 10.6 (the same in pallet equivalents) and 3.4 (pieces, with stock above 26 weeks left out). Each has a bias:
-  - The average is pulled up by Excess parts (the GDC's is 18.6, against a median of 8.7).
-  - Weighting by pieces is ruled by a few bolts and nuts. At the GDC the 5 pairs with the most stock hold 58% of all pieces, and all five are bolts or nuts. SKU33 alone (11,605 pieces) moves the GDC from 12.9 to 10.7 weeks. At PDC3 the top 5 hold 84%.
-  - Weighting by pallet equivalents is ruled by bulky, slow parts. PDC1 jumps to 10.6 because of parts like the Blower Motor Gen2 (SKU22, 6 per pallet, 43 weeks of stock).
-  - Every average lets excess on some parts hide shortages on others. The GDC holds 862 pallet equivalents above 26 weeks while its Stockout and Short pairs are 2,838 pieces short of 4 weeks (backorders included).
-  - The status mix is WOS sorted into the 5.3 bands, so it summarizes WOS without these problems. WOS per part stays in the output file.
-- Why no median in the row: the status mix already shows where the middle part sits. Among pairs with demand, 54% of PDC1's are Stockout or Short, so its median (2.6 weeks) is Short. At the GDC, PDC2 and PDC3 the share is 31%, 46% and 45%, so their medians (8.7, 6.2 and 5.3 weeks) are Healthy. The exact figure changes no decision, and it depends on a definition choice (PDC1 is 2.6 weeks with stockouts included, 6.6 without) that could be misread as the stock of the whole DC.
-- Why count parts for the service side: a missing low-cost part can stop a repair just like an expensive one, and the data has no cost or criticality to weight by (section 6).
-- Why pallet equivalents for the space side: pieces mix bolts (1,000 per pallet) and windshields (10 per pallet), and pallet equivalents put them on one scale of warehouse space. They are not actual occupied pallet positions, and holding cost needs cost data (section 6).
-- Result:
-  - PDC1 is the most at risk: 38 of its 82 pairs (46%) are Stockout or Short, against 40% at PDC2 and PDC3 and 28% at the GDC.
-  - The GDC holds 862 of the 1,168 pallet equivalents above 26 weeks (74%), out of 2,645 on hand there.
-  - PDC3 has the least excess (18 pallet equivalents above 26 weeks) but the most stock with no demand: 122 dead stock and 87 wanted at another site.
-  - Watch list: GDC 12, PDC1 4, PDC2 5, PDC3 2. Timing flag: none (5.3). Parts not in the part master: 120 pieces at the GDC, 35 at PDC2.
-- In code: `build_dc_summary` in `src/rollup.py`. It checks that the all-sites row adds back to the master table. Evidence: `exploration/10_rollup_evidence.py`.
-- Chart: `output/status_mix_by_dc.png` shows the status mix as one 100% stacked bar per DC, plus all sites, with each share labelled where it fits (`plot_status_mix` in `src/charts.py`). The colors follow the WOS scale: too little stock in warm colors (Stockout red, Short orange), Healthy as a neutral gray because it needs no action, Excess in blue at the other end, and No demand as a darker gray off the scale. Green for Healthy was tried first, but next to orange it is hard to tell apart for red-green color-blind readers. The chosen colors pass that check, and the legend and labels name every status, so nothing relies on color alone.
+**5.3 Inventory status.** Every pair gets one of five statuses from its WOS (5.2). The lines are my choice, and the same at all four sites.
 
-**5.5 Incoming supply review: a dated projection to Jan 31.** Every part and location is projected day by day from the snapshot (2026-10-22) to 2027-01-31. Projected stock on a day = on-hand + supply landed so far + planned restock received so far − demand so far, all in whole pieces. Customers buy every day: each month's demand is spread evenly over its days, with the running total rounded to whole pieces. Planned restock goes out as one shipment on the 1st of each month. Each PO line lands in full on its ETA. Stock may go below zero, as a backorder (4.6), and a day that ends below zero is a day without stock. Each pair gets a run-out date, its days without stock, its worst backorder, and its stock, WOS and status on Jan 31. WOS on Jan 31 uses the same Nov to Jan weekly rate as 5.2, and status uses the same lines as 5.3. Each PO line gets a verdict and an action.
-- **Why a dated projection instead of WOS after supply:** WOS treats all stock as there today and all demand as smooth. Supply lands on dates, and a delivery that arrives after the shelf is empty does not prevent the stockout. 42 of the 109 PO lines land after their site has already run out (40 pairs), after a median 29 days without stock.
-- **Why Jan 31:** all open supply lands by 2027-01-12, so every open PO line lands inside the window, with almost three weeks left to see its effect. It is also the same three months as WOS (5.2). The data has no order dates, so lead times are unknown, and the projection assumes no new order lands before Jan 31.
-- **Timing and whole pieces:** the forecast and the restock plan are monthly, so the projection needs a rule for when in the month things move.
-  - Customers buy every day. Orders come in through the month, so each month's customer demand is spread evenly over its days. The data does not say which days, and an even pace leans neither early nor late.
-  - Planned restock is one shipment on the 1st of each month. Every restock month is a whole number of pallets (section 1), which reads as a monthly shipment, sent at the start of the month it covers.
-  - Whole pieces. Stock on a shelf is whole, so the running total of demand is rounded each day (half a piece rounds up), and when the GDC cannot fill all its orders it sends whole pieces only. A day is without stock only when at least one whole piece of demand is unmet. Example: SKU29 at PDC2 has nothing on hand and 1 piece of November demand. Counted in fractions, it was "out" on 2026-10-22, short by 0.03 of a piece, and PO1013 was called late for landing when the site was 0.1 of a piece short. In whole pieces it runs out on 2026-12-28, and PO1013 is on time.
-  - Evidence: the supply review rerun with the same monthly numbers timed in other ways (`exploration/12_timing_evidence.py`). Each column is one way of timing the flows:
+| Status | Rule |
+|---|---|
+| Stockout | Demand, but WOS 0: nothing on hand, a backorder, or no inventory row |
+| Short | WOS above 0 and under 4 weeks |
+| Healthy | WOS from 4 to 26 weeks |
+| Excess | WOS over 26 weeks |
+| No demand | No demand at this site in any of the 24 months. `no_demand_reason` says why: dead stock, wanted at another site, or not in the part master (4.10, never dead stock) |
 
-    | | Chosen | Restock spread evenly | Customers on the 1st | Customers on the 15th | Customers on the last day | Earlier: fractions, both even |
-    |---|---|---|---|---|---|---|
-    | Pairs that run out by Jan 31 | 158 | 158 | 167 | 155 | 150 | 163 |
-    | PO lines that land too late | 42 | 44 | 54 | 38 | 28 | 47 |
-    | Stockout on Jan 31 | 114 | 116 | 117 | 114 | 114 | 114 |
-    | SKU75 at the GDC runs out | Nov 26 | Nov 28 | Nov 1 | Nov 15 | Nov 30 | Nov 28 |
+- Why 4 weeks: it is about one restock cycle. 112 of the 212 restock rows plan a shipment every month, so a site with less than a month of stock is likely to run out before the next delivery. It is also where WOS and the actual run-out time agree: no pair with 4 weeks or more runs out within 4 weeks.
+- Why 26 weeks:
+  - Normal deliveries should not look like Excess. Whole pallets make some deliveries big: 39 of the 212 restock rows deliver more than 13 weeks of demand at once.
+  - Restocking takes time. Open supply lands up to 11.7 weeks after the snapshot, so a site waiting on a slow order needs about 12 weeks of stock to bridge the wait.
+  - A higher line would hide most of the excess: 1,168 pallets sit above 26 weeks, against 618 above 39 and 232 above 52.
+- Why the same lines everywhere: open supply lands over the same span at the GDC and the PDCs, so nothing in the data shows one site waiting longer than another.
+- Watch list: the 23 Healthy pairs above 13 weeks stay Healthy, but are counted as a group in the DC summary (5.4).
+- Timing flag: a pair with 4 weeks or more that still runs out within 4 weeks, when the forecast is walked month by month, keeps its status and gets the flag "runs out sooner than WOS suggests". No pair gets it in this run.
 
-  - Restock spread evenly over the days, like daily deliveries, gives almost the same results as one shipment on the 1st. The real cadence (weekly, every two weeks) sits somewhere between, so the results do not hang on it.
-  - Customer demand as one batch per month does hang on the day picked: lines that land too late range from 28 to 54, and run-out dates snap to that day. So customers stay a daily flow.
-- **Planned restock at the PDCs: only what the GDC can send.** PDCs are refilled mainly by the GDC's planned restock, so how it is counted matters most. The GDC's demand already includes it (5.1). The GDC fills all its orders in date order, its own customers and the PDCs alike, with no priority. While it has stock, each planned restock leaves on its day. When it is empty, orders wait in line, and when a PO lands the waiting orders go first. Restock counts at the PDC on the day it leaves the GDC.
-  - Why: the full plan has the GDC sending 27,311 pieces in Nov to Jan, but with its stock and open POs it can send 14,813 (54%). Counting the full plan would leave 8 PDC pairs in Stockout on Jan 31, which is too hopeful. Leaving restock out would leave 145, which ignores how PDCs are refilled. Counting what the GDC can send leaves 62.
-  - Example: SKU26. The GDC has 814 pieces and no PO, and runs out on 2026-11-01, when November's restock is due. PDC2 was planned 4,000 pieces in Nov to Jan and receives 454. PDC1 was planned 2,000 and receives 227. Orders due the same day share what the GDC has.
-  - Restock that waits does ship once supply lands, but most waits past January: only 196 pieces ship late (`exploration/11`, section 4), while 12,498 are still waiting on Jan 31 (79 PDC pairs, 45 parts).
-  - GDC transfers already on the road and planned restock are counted as separate shipments, because the plan leaves room for what is in transit. Only 1 of the 43 transfers matches the planned restock in the month it lands. For 27 of them the plan sends nothing to that PDC that month. Transfers are also loose pieces, while planned restock comes in whole pallets (section 1). For example, PO1011 brings 4,432 pieces of SKU43 to PDC3 on 2026-11-17, and the plan sends PDC3 nothing in Nov to Jan.
-- **The 10 days before November count no restock.** No forecast covers Oct 22 to 31. Customers keep buying at November's rate (5.2). The restock plan starts in November and has no October rows, so no restock moves before then. The data does not show whether anything ships in those days, and assuming it at November's pace would give the PDCs 4,475 pieces the plan does not show, which could hide shortages a planner should act on. The same rule applies to the run-out walk in 5.2 and the timing flag in 5.3.
-  - Flag: "runs out before the restock plan starts", on 40 PDC pairs (34 parts). These pairs have restock planned in November but run out before November while the GDC holds the part. They are 1,002 pieces short in all, and 24 of them have no stock today. If the GDC ships before November, the gap closes. Example: SKU44 at PDC1 has no stock and is up to 109 pieces short before November, while the GDC holds 6,547.
-  - Not flagged: 12 pairs with no November restock planned either, such as SKU98 at PDC2. The October gap is not what leaves them short. The PO line review and the moves show them.
-- **Date rule:** stock is in whole pieces, so the run-out date is the first day that ends below zero, with at least one piece of demand unmet. The WOS run-out walk (`weeks_until_run_out` in `src/wos.py`, 5.2) uses the same whole-piece rule. On today's stock alone it gives the same day as the projection for 123 of the 124 PDC pairs with stock that run out by Jan 31 (the other is one day apart, where demand lands on exactly half a piece). At the GDC the walk spreads the restock over the month while the projection ships it on the 1st, so 36 of the 53 GDC pairs run out sooner in the projection.
-- **Verdict for each PO line** (a later rule in this list wins):
-  - **on time:** keep.
-  - **adds to excess:** some of the line sits above the 26-week line on Jan 31, counting the latest arrivals as the extra pieces. Push out or cut those pieces. A GDC transfer is already on the road, so cut the next planned restock instead.
-  - **lands too late:** the site is already short when the line lands. Expedite the PO. A GDC transfer is already on the road, so bridge from another site instead.
-  - **no demand here** or **no demand anywhere:** redirect to a site with demand, or cancel or return.
-  - **not in the part master:** check the part number before it lands (4.10).
-  - Result (109 lines, 24,538 pieces):
-    - On time: 41 lines (5,617 pieces).
-    - Lands too late: 42 lines (9,410 pieces at 40 pairs). That is 23 supplier POs to expedite and 19 transfers to bridge. The sites are 3,633 pieces short in all by the time these lines land.
-    - Adds to excess: 19 lines (8,805 pieces). 3,156 of those pieces (124 pallet equivalents) land above the line. 12 lines go to pairs that are already Excess, and 7 tip a pair into Excess.
-    - No demand anywhere: 6 lines (646 pieces, all dead stock).
-    - Not in the part master: 1 line (SKU903, 60 pieces).
-    - Of the 22 look-alike lines (4.5), 7 land too late, 6 are on time, 5 add to excess and 4 go to dead stock.
-- **GDC shortfalls:** 53 of the 88 GDC parts with demand run out before Jan 31, even with open supply. By run-out month that is 7 in late October, 22 in November, 13 in December and 11 in January. 47 of them have no PO landing after they run out, so the action is to order now. For the other 6 it is to expedite the PO and check that it covers the gap. Today 26 of the 53 are Healthy, 22 Short and 5 Stockout, so WOS alone hides most of this. The largest are SKU75 (runs out 2026-11-26, 8,924 pieces of orders waiting by Jan 31), SKU26 (2026-11-01, 6,386) and SKU2 (2026-12-07, 6,049). This is also where most PDC shortages start: the 12,498 restock pieces still waiting on Jan 31 belong to these parts.
-- **Moves between sites:** spare stock is what sits above the 26-week line at an Excess pair, plus all stock at a pair with no demand that another site wants (5.3). Need is the worst backorder at a pair with demand. At the GDC only its own customers count, because restock it cannot send already shows up at the PDCs. Spare goes to the biggest need first.
-  - Result: 48 moves for 36 parts, 2,293 pieces (207 pallet equivalents). 13 are GDC to PDC, the usual route (1,070 pieces). The other 35 (1,223 pieces) go between PDCs or from a PDC back to the GDC, and are labelled "check if a transfer is possible".
-  - SKU98 is the largest: 926 pieces from the GDC to PDC2. PDC2 has no stock and needs 746, 814 and 759 in Nov to Jan. PO1022 brings 1,505 on 2027-01-12, but by then 2,078 pieces are already waiting, so PDC2 is out on all 102 days and still 1,063 short on Jan 31. Caveat: on the Nov to Jan rate the GDC's 1,540 pieces look Excess (WOS 65 weeks), but PDC2's restock only starts in February (720, 744 and 720 a month), so the GDC's stock runs out on 2027-03-01, when March's restock is due. The "spare" is really PDC2's February to April restock, held early. Sending it now is still right, because it goes to the same PDC, but the GDC then needs an order, and it has no open PO.
-  - Moves only use stock above the 26-week line. When the GDC could ship its normal stock early, the October flag above shows it (SKU44: the GDC holds 6,547).
-- **Known limits:**
-  - The real restock cadence is unknown. One shipment on the 1st of each month is an assumption, and spreading restock evenly over the days gives almost the same results (see Timing above).
-  - GDC to PDC transit time is unknown and taken as zero.
-  - Each PO lands in full on its ETA.
-  - Moves are matched greedily, biggest first, not optimized (section 6).
-  - No minimum move size: 13 of the 48 moves are under 5 pieces. A planner would likely skip them, but the data has no transport cost to set a minimum by.
-- **Result (340 pairs):**
-  - 158 pairs run out at some point by Jan 31: GDC 53, PDC1 35, PDC2 35 and PDC3 35. The median among them is 42 days without stock, and 8 are out every day.
-  - Status on Jan 31: Stockout 114 (GDC 52, PDCs 62), Short 36, Healthy 99, Excess 51 and No demand 40.
-  - Of today's 115 Healthy pairs, 43 are Stockout on Jan 31.
-- **Not used:**
-  - The full restock plan (too hopeful).
-  - No restock at all (unrealistic).
-  - Late-October restock at November's pace (4,475 pieces the plan does not show).
-  - Counting a line late just because it lands after the site's first run-out date, even when another delivery had refilled the site in between.
-  - Customer demand as one batch per month, and fractions of a piece (see Timing above).
-- **In code:** `src/supply_review.py`.
-  - `customer_flow` and `restock_shipments` set the timing: customers as a daily flow and restock as one shipment on the 1st, both in whole pieces. `flows_by_day` and `check_flows` build the daily flows and check the totals.
-  - `restock_received_so_far` lets the GDC fill its orders in date order.
-  - `project_stock` and `add_projection_columns` build the projection and its columns.
-  - `daily_stock_table` saves the projection itself as `output/daily_stock.csv`, one row per part, location and day (340 pairs × 102 days = 34,680 rows). Its last day matches `stock_jan31` and its first day below zero matches `run_out_date` for every pair.
-  - `review_supply_lines` gives each PO line its verdict.
-  - `gdc_shortfalls` and `suggest_moves` build the GDC shortfall list and the moves.
-  - `flag_before_restock_plan` writes the October flags.
-  - Evidence: `exploration/11_supply_review_evidence.py`, which also compares the three restock views, and `exploration/12_timing_evidence.py` for the timing.
+*Code: `label_status`, `label_no_demand_reason` and `flag_early_run_out` in `src/status.py`. Evidence: `exploration/09`.*
 
-**5.6 The planning agent (the bonus).** A language model answers planning questions in plain English through four tools that read the output tables. The model only picks a tool and its inputs (one read-only SQL query counts as an input) and writes the words. Every number, table and chart comes from `output/` and the code.
-- Why four tools, not one per question: the output tables already hold every derived number (WOS, status today and on Jan 31, pallets, the no-demand reason) and every recommendation (the PO verdict and action, GDC orders, moves, flag notes). So the model only filters, groups and sums. It never decides a definition or invents an action. A first plan had 12 narrow tools, most of them the same filtered query. They became one SQL tool, the dashboard's own charts (`show_chart`), a free chart (`make_chart`) and a what-if (`what_if_move`), which needs the status rules in code.
-- How the numbers stay honest:
-  - Each tool sends its full table or chart to the page. The model sees at most 20 rows and the row count. When a result is cut short, the tool tells the model to state no largest, smallest or total from what it saw. This rule came from a test answer that called the week of Nov 16 "the largest" after seeing 20 of 45 rows: the real peak was 5,899 pieces at PDC3 in the week of Dec 28. `make_chart` also passes the 3 largest values, worked out in code.
-  - The prompt forbids arithmetic in the model's head, with a wrong and a right example, after a test answer said "about 69% of the total". Where a question needs a total, code adds it (the no-demand pallets per site in `pallets_tied_up`).
-  - The SQL copy is locked twice: only SELECT and WITH get through, and the database itself refuses writes (`PRAGMA query_only`), so a query can't switch the lock off.
-- The what-if is today's view only: new on-hand at both sites, WOS with the same formula (5.2), status with the same lines (5.3). The projection to Jan 31 (5.5) is not rerun, and the answer says so. Example: 926 pieces of SKU98 from the GDC to PDC2 take PDC2 from Stockout to Healthy (5.3 weeks) and leave the GDC at 26.0 weeks, still Excess. The agent adds the 5.5 caveat on its own: the GDC's stock is PDC2's later restock, held early.
-- Memory lives in the server (LangGraph's `InMemorySaver`), one conversation per browser session. A restart clears it, and changing the model starts a new conversation.
-- Models: six models on ASU CreateAI got 4 questions with known answers and 4 traps (a lead time, a money value, a part that doesn't exist, the planner of a part missing from the part master). Claude Sonnet 5.5, Claude Opus 5.5 and GPT-5.5 got all 8 right. Left out: Gemini Pro 3.1 (slow, and 47% from adding two rounded shares where the real figure is 46.3%), Gemini Flash 3.7 (twice wrote a tool call as text instead of making it) and GPT-5.4 mini (made up "13,057,962 pieces worth of inventory value"). Sonnet is the default: as accurate as Opus and faster (8 s against 14 s per question). All run at temperature 0. A question stops after about 9 tool calls (20 graph steps), and a model call that stalls is retried after 45 seconds.
-- Test set (`assistant/check.py`): 18 questions, each checked three ways. A fitting tool ran. The answer names the right facts, worked out with pandas from `output/` at run time. Every number in the answer appears in something the model saw (a tool result, the question or the prompt), give or take one unit of its last digit. All three models pass 18 of 18 (2026-10-29). The first runs failed for two kinds of reasons:
-  - Checker bugs: CSV commas read as thousands separators, and the digits of part codes dropped from what the model saw.
-  - Real issues, fixed in the prompt: GPT-5.5 pasted SQL into its answers and named 1 of 4 parts it was asked for, and Sonnet tied 48 days without stock to a run-out date (those days are not always in a row).
-- What the checks can't see: whether an explanation is right. The answers were also read by eye.
-- In code: `assistant/`. `agent.py` builds the agent, `prompt.py` holds the rules and the guide to the tables, `tools.py` the four tools, `database.py` the read-only copy, `page.py` the chat page (the first page of `app.py`), `ask.py` the terminal version, and `check.py` the test set.
+**5.4 DC-level summary.** One row per DC, plus an all-sites row, in three parts:
+1. **Status mix:** pairs in each status (5.3), as counts and as shares of the DC's pairs. This leads the view.
+2. **Space, in pallet equivalents:** on hand, above the 26-week line (Excess pairs only), dead stock, and wanted at another site, with nothing counted twice. Parts not in the part master are shown in pieces (4.10).
+3. **Action counts** that overlap the statuses and are never added to them: the watch list and the timing flags (5.3).
+
+- Why a status mix and not one WOS number: one number hides the spread, and each way of making it has its own bias. PDC1's average WOS is 11.0 weeks, its median is 2.6, and weighting by pieces or by pallets gives 4.4 or 10.6. An average also lets excess on some parts hide shortages on others: the GDC holds 862 pallet equivalents above 26 weeks while its Stockout and Short pairs are 2,838 pieces short of 4 weeks. The status mix is WOS sorted into the 5.3 bands, so it keeps the spread, and WOS per pair stays in the output.
+- Why count pairs: a missing cheap part can stop a repair just like an expensive one, and the data has no cost or criticality to weight by.
+- Why pallet equivalents for space: pieces mix bolts (1,000 per pallet) and windshields (10), and pallet equivalents put them on one scale of warehouse space.
+
+*Code: `build_dc_summary` in `src/dc_summary.py` (it checks that the all-sites row adds back to the master table) and `plot_status_mix` in `src/status_chart.py`. Evidence: `exploration/10`.*
+
+**5.5 Incoming supply review: a dated projection to Jan 31.** Every pair is projected day by day from the snapshot to 2027-01-31, in whole pieces: stock = on-hand + supply landed + planned restock received − demand, so far. Each PO line lands in full on its ETA, stock below zero is a backorder (4.6), and a day that ends with at least one whole piece of demand unmet is a day without stock. Each pair gets a run-out date, its days without stock, and its stock, WOS and status on Jan 31 (the 5.2 rate and the 5.3 lines). Each PO line gets a verdict and an action.
+- Why a dated projection and not WOS after supply: a delivery that lands after the shelf is empty does not prevent the stockout. 42 of the 109 PO lines land after their site has already run out.
+- Why Jan 31: all open supply lands by 2027-01-12, so every line lands with almost three weeks left to see its effect, and it is the same window as WOS. The data has no order dates, so lead times are unknown, and no new order is assumed to land before Jan 31.
+
+**Timing: customers buy every day, planned restock ships once a month.** The two flows work differently, so they get different patterns.
+- Planned restock has a month and a quantity but no date, unlike open supply, which has an ETA and lands on it. Restock months are whole pallets (section 1), which reads as one monthly shipment: 28% are a single pallet, and only 14% could be split into four weekly whole-pallet shipments. So it ships on the 1st of the month it covers.
+- Customer demand is loose pieces. Only 13% of customer months are whole pallets, and the median is 16 pieces a month. So each month's demand is spread evenly over its days in whole pieces: a glass that sells 7 a month leaves the shelf about every 4 days.
+- Evidence: the same monthly numbers, timed other ways (`exploration/12`).
+
+  | | Chosen | Restock spread evenly | Customers once a month (1st / 15th / last day) |
+  |---|---|---|---|
+  | Pairs that run out by Jan 31 | 158 | 158 | 167 / 155 / 150 |
+  | PO lines that land too late | 42 | 44 | 54 / 38 / 28 |
+  | Stockout on Jan 31 | 114 | 116 | 117 / 114 / 114 |
+
+  Spreading restock over the month changes almost nothing, so the results don't hang on the real restock cadence. Batching customers once a month does: late lines swing from 28 to 54 with the day picked, so customers stay a daily flow.
+
+**Planned restock at the PDCs: only what the GDC can send.** The GDC fills all its orders in date order, its own customers and the PDCs alike. When it is empty, orders wait, and a landing PO serves them first. Restock counts at the PDC on the day it leaves the GDC.
+- Why: the plan asks the GDC for 27,311 pieces in Nov to Jan, but with its stock and open POs it can send 14,813 (54%). On Jan 31, counting the full plan would leave 8 PDC pairs in Stockout (too hopeful), leaving restock out would leave 145, and counting what the GDC can send leaves 62.
+- GDC transfers already on the road count apart from the plan: only 1 of the 43 matches the planned restock in the month it lands.
+
+**No restock before November.** The plan has no October rows, so no restock moves from Oct 22 to 31, while customers keep buying at November's rate. Assuming October restock at November's pace would add 4,475 pieces the plan does not show. Flag, on 40 PDC pairs that run out before November while the GDC holds the part (1,002 pieces short): "runs out before the restock plan starts".
+
+**Verdict for each PO line** (a later rule wins):
+- on time: keep.
+- adds to excess: part of the line sits above 26 weeks on Jan 31. Push out or cut those pieces (for a transfer already on the road, cut the next planned restock).
+- lands too late: the site is already short when it lands. Expedite the PO, or bridge a transfer from another site.
+- no demand here or anywhere: redirect to a site with demand, or cancel or return.
+- not in the part master: check the part number before it lands (4.10).
+
+**GDC shortfalls.** A GDC part that runs out by Jan 31 is "order now" when no PO lands after it runs out (47 of the 53), and "expedite the open PO and check it covers the gap" otherwise.
+
+**Moves.** Spare stock (above 26 weeks at an Excess pair, or at a no-demand pair another site wants) goes to the biggest backorder first. At the GDC only its own customers count as need, because restock it can't send already shows up at the PDCs. A move against the usual GDC to PDC route says "check if a transfer is possible". The list is candidates to check, not a plan: 35 of the 48 go against the usual route. Caveat: the GDC's 1,540 pieces of SKU98 look Excess on the Nov to Jan rate (65 weeks), but they are PDC2's Feb to Apr restock, held early. Sending 926 to PDC2 now is still right, since it is the same PDC, but the GDC then needs an order.
+
+**Known limits:**
+- The real restock cadence and GDC to PDC transit time are unknown, taken as once a month on the 1st and zero.
+- Demand is the expected pace, not random, so run-out dates are expected dates and safety stock is not modelled.
+- Each PO lands in full on its ETA.
+- Moves are matched greedily, biggest need first, not optimized, and have no minimum size: 13 of the 48 are under 5 pieces.
+
+*Code: `src/supply_review.py`: `project_stock` for the projection (saved as `output/daily_stock.csv`), `review_supply_lines`, `gdc_shortfalls` and `suggest_moves` for the lists, `flag_before_restock_plan` for the October flags. Evidence: `exploration/11`, `12`.*
+
+**5.6 The planning agent (the bonus).** A language model answers planning questions in plain English but never computes a number. It picks one of four tools (`run_sql`, `show_chart`, `make_chart`, `what_if_move`) and their inputs, such as a read-only SQL query, and writes the words. Every number, table and chart comes from `output/` through our code, because the output tables already hold every derived number and recommendation.
+- Each tool sends its full table or chart straight to the page. The model sees only a preview (the first 20 rows and the row count), enough to write its answer, and its advice comes from the pipeline's verdict and action columns. "How I got this" under each answer shows every step and its SQL.
+- The what-if shows today's WOS and status at both sites (5.2, 5.3). It does not rerun the projection to Jan 31, and the answer says so.
+- Six models were tried through ASU's CreateAI gateway. Claude Sonnet 5.5 (the default), Claude Opus 5.5 and GPT-5.5 got every answer right and made nothing up. The other three got a number wrong, invented one, or broke their tool calls.
+- The test set asks 18 questions: Tesla's four examples, charts, supply, a what-if, a follow-up that needs memory, and five traps (a part that doesn't exist, a part missing from the part master, a name shared by three parts, a money question the data can't answer, an off-topic request). Each answer must use a fitting tool, name the right facts (worked out with pandas from `output/`) and contain no number the model didn't see in a tool result. All three models passed 18 of 18.
+
+*Code: `planning_agent/` (`tools.py` for the tools, `prompt.py` for the rules). Test set: `planning_agent/evaluate.py`.*
 
 ## 6. What I would do with more time
 
-To be collected as the work goes on.
+This analysis takes one snapshot and checks the plan that already exists. With more time I would grow it into a small digital twin of the network: the same data and rules, kept up to date and run forward many times, so a planner can test a choice before making it. The dashboard and the agent would be its front end.
 
-- Set the Short and Excess lines per part from supplier lead time and demand variability (a safety stock rule), instead of one pair of lines for every part (5.3). That needs real lead times, which the data only hints at through the open supply ETAs.
-- Add unit cost and service criticality to the part data. No single weighting answers every question: counting parts shows how exposed availability is, pallet equivalents show warehouse space, and inventory value shows the money tied up. The DC summary uses the first two because the data has neither costs nor criticality. With them, it could also show the value tied up in excess and dead stock, and rank shortages by how critical each part is.
-- Ask the planner for the GDC's restock plan for late October, which the data does not include. The supply review counts no restock before November (5.5), and 40 PDC pairs are flagged because of it.
-- Use real GDC to PDC transit times and delivery days (weekly, every two weeks), instead of one restock shipment on the 1st of each month with no transit time (5.5). Measure spare stock against the forecast walked forward, not the Nov to Jan rate alone, so that a GDC holding a later restock early (SKU98) is not called spare.
-- Let the moves use supply that is still on its way, not only stock that is spare today (5.5). Example: SKU75 at the GDC runs out on 2026-11-26 and is 8,924 pieces short on Jan 31, with no PO. Meanwhile PO1025 brings 5,843 pieces to PDC3 on 2026-12-29. Its verdict is "lands too late" (PDC3 runs out on 2026-12-05), and it leaves PDC3 Excess on Jan 31 with 4,494 pieces. A planner would likely send part of PO1025 to the GDC instead. The moves can't suggest that today. The optimization model below would weigh it together with the other choices.
-- **Let an optimization model build the supply plan, instead of only checking it.** This analysis checks the plan that already exists: how long today's stock lasts, and whether incoming supply and planned restocks arrive in time. The next step is to let a model choose the plan. This is a multi-period inventory planning problem. It belongs to the same family as production planning, where a plant decides how much to make each month and how much to carry into the next. Here it runs on a two-level network: suppliers feed the GDC, and the GDC feeds the three PDCs.
-  - **Decisions,** for each part and month: how much to order from suppliers into the GDC, how much to ship from the GDC to each PDC, and how much stock each site carries into the next month.
-  - **Stock balance** at every site and month: stock at month end = stock at month start + arrivals (supplier POs, transfers, restocks) minus pieces sold or shipped out. Demand that cannot be met becomes a backorder and carries forward, the same way 4.6 treats negative on-hand.
-  - **Goal:** the lowest total of holding cost (stock carried each month) plus a penalty for each piece short, and possibly a fixed cost for each order or shipment.
-  - **Rules:** GDC to PDC shipments come in whole pallets (`qpc`, section 1), orders arrive after a lead time, each site keeps a minimum stock level (for example the 4-week Short line in 5.3), and each site has a space limit in pallet equivalents. A monthly supplier capacity would play the role of production capacity.
-  - **Example in round numbers:** PDC2 has 100 pieces and needs 300 a month, a supplier PO lands in 6 weeks, and the GDC holds 500 more than it needs this month. The model weighs shipping 200 now (PDC2 is covered, but the GDC may run short before its own next PO) against waiting for the PO (PDC2 is short for about a month). SKU98 at PDC2 is a real case of this choice (supply review).
-  - **What the data has, and what it lacks.** It has on-hand, 24 months of demand per site, open supply with ETAs, and `qpc` for whole pallets. Pallet equivalents can stand in for holding cost and space. It has no unit costs, holding or shortage costs, supplier lead times (there are no order dates, only open supply landing up to 11.7 weeks after the snapshot, 5.3), GDC to PDC transit time, warehouse capacity or supplier minimum order sizes. Each would need real data or a stated assumption, and the plan would be rerun to see how much it changes when those values move.
-  - **Uses:** compare the model's restock plan with the planned Replenishment rows, decide cases like SKU98 at PDC2 (send early from the GDC, expedite the PO, or order more), and choose which stock to move from sites with no demand to sites that need it (12 pairs, 1,536 pieces, 5.3).
-  - **Smallest useful version:** one part, the four sites and the next 6 months, written as a linear program (a cost to minimize, with every rule written as a simple sum), with whole pallets as whole-number variables. An open-source solver such as `scipy.optimize.milp` or PuLP handles this size easily.
-- For the planning agent (5.6):
-  - Keep the conversations in a database (LangGraph has SQLite and Postgres checkpointers), so they survive a restart.
-  - Grow the test set from real planner questions, and run it on every change.
-  - Let the what-if rerun the day-by-day projection to Jan 31, not only today's view.
-  - Add the optimization model above as a fifth tool, so "what's the best plan for SKU98?" is answered by a solver, not by the model.
-  - Sign-in on a public deployment, so only the planning team can use the key.
+**Simulation: stock, space and workload, day by day.** The projection (5.5) runs once, at the expected pace of demand. A simulation would run the same 102 days many times, with demand drawn at random around the forecast, and track space and handling as well as stock:
+- Service risk: each run-out date becomes a range, for example "a 90% chance this part runs out between Nov 20 and Dec 5", and the Short and Excess lines can be set per part from lead time and demand variability (a safety stock rule) instead of 4 and 26 weeks for every part (5.3).
+- Warehouse occupancy: pallet equivalents on hand per site and week, shown as a site-by-week heatmap against each site's capacity, to show where and when space runs short. The GDC already holds 2,645 of the 4,393 pallets on hand (60%), and 862 of them sit above 26 weeks.
+- Receiving and shipping load: pallets arriving per site and day (PO ETAs and planned restock) and leaving (to customers and PDCs), to show the peak days a dock or a crew has to absorb.
+- Before and after: the same runs for today's plan and for a changed one (the SKU98 move, a cut excess line, the optimizer's plan below), side by side, so planners, industrial engineers and managers see what a decision does to stockouts, space and workload, and where the bottleneck moves.
+
+**Optimization.** Let a model choose the plan instead of only checking it. This is multi-period inventory planning on a two-level network (suppliers feed the GDC, the GDC feeds three PDCs), the same family of problem as production planning.
+- Decisions, per part and month: supplier orders into the GDC, shipments from the GDC to each PDC, and the stock each site carries.
+- Rules: stock balance at every site and month (backorders carry forward, as in 4.6), shipments in whole pallets (`qpc`), a minimum stock level such as the 4-week line, and a space limit per site in pallet equivalents.
+- Goal: the lowest holding cost plus a penalty for each piece short, and possibly a fixed cost per shipment.
+
+**What-if analysis for disruptions.** Today's what-if moves stock and shows today's WOS only (5.6). I would let it rerun the full projection under a scenario, compare it with the base case, and show which pairs newly run out, and when: a supplier PO that slips 2 or 4 weeks or arrives short, a supplier or a site stopped for a week, the GDC unable to ship to one PDC for a while, or a demand spike for one part type (a recall or a fleet campaign). The optimizer could then suggest the cheapest recovery.
+
+**Cost and criticality.** With unit costs and a criticality class per part, rank shortages by service impact and show the money tied up in excess and dead stock. The DC view counts pairs and pallets because the data has neither (5.4).
+
+**The agent.** Today it answers one question at a time with four tools (5.6). Next:
+- The twin as tools: run a simulation, a disruption what-if or the optimizer, then explain the result.
+- Workflows, not only questions: an orchestrated, multi-step run on each new snapshot that reruns the pipeline, finds what changed since the last one, drafts the planner's action list and sends it for approval. A person signs off before anything is ordered or moved.
+- Connected to the team's tools through MCP (Model Context Protocol, an open standard for connecting AI agents to data and apps): its tools offered as an MCP server, so other agents and assistants can call them, and MCP connectors to the team's data sources and BI tools such as Tableau or Power BI, so it works on live data and its answers land where the team already looks.
+- The basics for real use: conversations kept in a database so they survive a restart, a test set grown from real planner questions, and sign-in on any public deployment.
